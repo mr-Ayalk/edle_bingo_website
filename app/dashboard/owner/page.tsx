@@ -167,7 +167,10 @@ export default function OwnerDashboardPage() {
       body: JSON.stringify(body),
     });
     const data = await res.json();
-    if (!res.ok) return toast.error(data.message);
+    if (!res.ok) {
+      toast.error(data.message);
+      return;
+    }
     toast.success(agentForm.id ? 'Agent updated.' : 'Agent created.');
     setAgentForm(defaultAgentForm);
     loadAll();
@@ -197,7 +200,10 @@ export default function OwnerDashboardPage() {
         ...(settings.downloadPassword ? { downloadPassword: settings.downloadPassword } : {}),
       }),
     });
-    if (!ownerRes.ok || !appRes.ok) return toast.error('Unable to save settings.');
+    if (!ownerRes.ok || !appRes.ok) {
+      toast.error('Unable to save settings.');
+      return;
+    }
     toast.success('Settings saved.');
     setSettings((s) => ({ ...s, password: '', downloadPassword: '' }));
     loadAll();
@@ -366,7 +372,10 @@ export default function OwnerDashboardPage() {
               e.preventDefault();
               const res = await fetch(`/api/users/${topUp.agentId}/topup`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: Number(topUp.amount) }) });
               const data = await res.json();
-              if (!res.ok) return toast.error(data.message);
+              if (!res.ok) {
+      toast.error(data.message);
+      return;
+    }
               toast.success('Top-up completed.');
               setTopUp({ agentId: '', amount: '' });
               loadAll();

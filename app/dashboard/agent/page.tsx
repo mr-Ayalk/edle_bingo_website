@@ -101,7 +101,10 @@ export default function AgentDashboardPage() {
       }),
     });
     const data = await res.json();
-    if (!res.ok) return toast.error(data.message);
+    if (!res.ok) {
+      toast.error(data.message);
+      return;
+    }
     setUser(data.user);
     toast.success('Voucher generated.');
     setAmount('');

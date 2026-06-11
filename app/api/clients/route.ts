@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { requireOwnerOrAgent } from '@/lib/api-auth';
 import { parseMoney, moneyToNumber } from '@/lib/money';
@@ -16,7 +17,7 @@ function serializeClient(client: {
   wereda: string;
   kebele: string;
   addressDetail: string;
-  packageAmount: { toString(): string };
+  packageAmount: Prisma.Decimal;
   createdAt: Date;
   updatedAt: Date;
   agent?: { name: string; username: string };
