@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  AGENT
+}
+
+enum VoucherStatus {
+  ACTIVE
+  USED
+}
+
+model User {
+  id          Int       @id @default(autoincrement())
+  username    String    @unique
+  passwordHash String   @map("password_hash")
+  role        Role
+  name        String
+  phone       String    @default("")
+  avatar      String    @default("🎲")
+  badge       String    @default("🚩")
+  gameAgentId Int?      @map("game_agent_id")
+  balance     Decimal   @default(0) @db.Decimal(14, 2)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  vouchers         Voucher[]
+  clients          Client[]
+  sentMessages     Message[]      @relation("SentMessages")
+  receivedMessages Message[]      @relation("ReceivedMessages")
+  notifications    Notification[]
+
+  @@map("users")
+}
+
+model Voucher {
+  id          Int           @id @default(autoincrement())
+  code        String        @unique
+  amount      Decimal       @db.Decimal(14, 2)
+  agentUserId Int           @map("agent_user_id")
+  agentName   String        @map("agent_name")
+  gameAgentId Int?          @map("game_agent_id")
+  status      VoucherStatus @default(ACTIVE)
+  createdAt   DateTime      @default(now()) @map("created_at")
+  usedAt      DateTime?     @map("used_at")
+  redeemedBy  String?       @map("redeemed_by")
+
+  agent User @relation(fields: [agentUserId], references: [id], onDelete: Cascade)
+
+  @@index([agentUserId])
+  @@map("vouchers")
+}
+
+model Client {
+  id            Int      @id @default(autoincrement())
+  agentUserId   Int      @map("agent_user_id")
+  fullName      String   @map("full_name")
+  phone         String
+  country       String   @default("")
+  region        String   @default("")
+  zone          String   @default("")
+  city          String   @default("")
+  town          String   @default("")
+  wereda        String   @default("")
+  kebele        String   @default("")
+  addressDetail String   @default("") @map("address_detail")
+  packageAmount Decimal  @db.Decimal(14, 2) @map("package_amount")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  agent User @relation(fields: [agentUserId], references: [id], onDelete: Cascade)
+
+  @@index([agentUserId])
+  @@map("clients")
+}
+
+model Message {
+  id           Int      @id @default(autoincrement())
+  senderId     Int      @map("sender_id")
+  receiverId   Int      @map("receiver_id")
+  content      String   @db.Text
+  fontFamily   String   @default("Inter") @map("font_family")
+  imageUrl     String?  @map("image_url")
+  sticker      String?
+  readAt       DateTime? @map("read_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  sender   User @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@index([senderId, receiverId])
+  @@index([receiverId, readAt])
+  @@map("messages")
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  title     String
+  body      String
+  read      Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@map("notifications")
+}
+
+model AppSettings {
+  id                    Int      @id @default(1)
+  aboutTitle            String   @default("About Edle Bingo") @map("about_title")
+  aboutDescription      String   @default("Edle Bingo is a modern bingo voucher management platform for agents and system administrators.") @map("about_description")
+  contactInfo           String   @default("DM +251951818822\n+251723358806") @map("contact_info")
+  location              String   @default("Addis Ababa, Ethiopia")
+  slogan                String   @default("EVERY DRAW OF PATTERN IS LUCKY ENCOUNTER")
+  downloadUsername      String   @default("downloads") @map("download_username")
+  downloadPasswordHash  String   @default("") @map("download_password_hash")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+
+  @@map("app_settings")
+}

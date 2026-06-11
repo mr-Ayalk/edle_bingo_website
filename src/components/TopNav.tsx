@@ -1,0 +1,118 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import { usePathname } from 'next/navigation';
+import { useI18n } from '@/contexts/I18nContext';
+import { useTheme } from '@/contexts/ThemeContext';
+
+type PublicSettings = {
+  contactInfo: string;
+  slogan: string;
+};
+
+export default function TopNav() {
+  const pathname = usePathname();
+  const { tr, locale, setLocale } = useI18n();
+  const { theme, toggleTheme } = useTheme();
+  const [settings, setSettings] = useState<PublicSettings>({
+    contactInfo: '+251951818822\n+251723358806',
+    slogan: 'EVERY DRAW OF PATTERN IS LUCKY ENCOUNTER',
+  });
+  const [unread, setUnread] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState<Array<{ id: number; title: string; body: string; read: boolean; createdAt: string }>>([]);
+
+  useEffect(() => {
+    fetch('/api/settings/public')
+      .then((r) => r.json())
+      .then(setSettings)
+      .catch(() => undefined);
+  }, []);
+
+  useEffect(() => {
+    if (pathname === '/' || pathname.startsWith('/dashboard/downloads')) return;
+    const load = () => {
+      fetch('/api/notifications')
+        .then((r) => r.json())
+        .then((data) => {
+          setUnread(data.unreadCount || 0);
+          setNotifications(data.notifications || []);
+        })
+        .catch(() => undefined);
+    };
+    load();
+    const interval = window.setInterval(load, 4000);
+    return () => window.clearInterval(interval);
+  }, [pathname]);
+
+  if (pathname === '/') return null;
+
+  const phones = settings.contactInfo
+    .split('\n')
+    .flatMap((line) => line.split(','))
+    .map((p) => p.trim())
+    .filter(Boolean);
+
+  const markAllRead = async () => {
+    await fetch('/api/notifications', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ markAllRead: true }),
+    });
+    setUnread(0);
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  };
+
+  return (
+    <header className="top-nav">
+      <div className="top-nav-left">
+        <div className="top-nav-logo">
+          <Image src="/images/icon.png" alt="Edle Bingo" width={38} height={38} className="logo-image" />
+          <div className="logo-text-group">
+            <span className="logo-text">EDLE BINGO</span>
+            <span className="logo-slogan">{settings.slogan}</span>
+          </div>
+        </div>
+      </div>
+      <div className="top-nav-right">
+        <div className="nav-controls">
+          <button type="button" className="nav-control-btn" onClick={toggleTheme} title={tr('theme')}>
+            {theme === 'light' ? '🌙' : '☀️'}
+          </button>
+          <select className="nav-lang-select" value={locale} onChange={(e) => setLocale(e.target.value as 'en' | 'am')} aria-label={tr('language')}>
+            <option value="en">{tr('english')}</option>
+            <option value="am">{tr('amharic')}</option>
+          </select>
+        </div>
+        <div className="notification-wrap">
+          <button type="button" className="notification-btn" onClick={() => setShowNotifications((v) => !v)} aria-label={tr('notifications')}>
+            🔔
+            {unread > 0 && <span className="notification-badge">{unread}</span>}
+          </button>
+          {showNotifications && (
+            <div className="notification-dropdown">
+              <div className="notification-header">
+                <strong>{tr('notifications')}</strong>
+                <button type="button" onClick={markAllRead}>{tr('markAllRead')}</button>
+              </div>
+              {notifications.length ? notifications.map((n) => (
+                <div key={n.id} className={`notification-item ${n.read ? '' : 'unread'}`}>
+                  <strong>{n.title}</strong>
+                  <p>{n.body}</p>
+                  <small>{new Date(n.createdAt).toLocaleString()}</small>
+                </div>
+              )) : <p className="text-muted">{tr('noData')}</p>}
+            </div>
+          )}
+        </div>
+        <div className="nav-contact-badge">{tr('support')}</div>
+        <div className="nav-phones">
+          {phones.map((phone) => (
+            <a key={phone} href={`tel:${phone.replace(/\s/g, '')}`} className="phone-link">{phone}</a>
+          ))}
+        </div>
+      </div>
+    </header>
+  );
+}
