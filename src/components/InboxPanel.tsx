@@ -31,14 +31,20 @@ export default function InboxPanel({ currentUserId }: { currentUserId: number })
   const [editContent, setEditContent] = useState('');
   const [mobileShowChat, setMobileShowChat] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const selectedIdRef = useRef<number | null>(null);
+  selectedIdRef.current = selectedId;
 
   const selectedContact = contacts.find((c) => c.id === selectedId);
 
   const loadContacts = async () => {
     const res = await fetch('/api/messages');
     const data = await res.json();
-    setContacts(data.agents || []);
-    if (!selectedId && data.agents?.length) setSelectedId(data.agents[0].id);
+    const agents: ChatUser[] = data.agents || [];
+    setContacts(agents);
+    setSelectedId((prev) => {
+      if (prev !== null && agents.some((a) => a.id === prev)) return prev;
+      return agents[0]?.id ?? null;
+    });
   };
 
   const loadMessages = async (withUserId: number) => {
@@ -57,7 +63,10 @@ export default function InboxPanel({ currentUserId }: { currentUserId: number })
   useEffect(() => {
     if (!selectedId) return;
     loadMessages(selectedId);
-    const interval = window.setInterval(() => loadMessages(selectedId), 4000);
+    const interval = window.setInterval(() => {
+      const id = selectedIdRef.current;
+      if (id) loadMessages(id);
+    }, 4000);
     return () => window.clearInterval(interval);
   }, [selectedId]);
 

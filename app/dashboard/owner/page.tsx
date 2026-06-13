@@ -322,8 +322,10 @@ export default function OwnerDashboardPage() {
                       <td><span className="agent-badge-large">{agent.badge}</span></td>
                       <td>{formatBirr(agent.balance)}</td>
                       <td>
-                        <button type="button" className="btn btn-light" onClick={() => setAgentForm({ id: agent.id, name: agent.name, username: agent.username, password: '', phone: agent.phone, avatar: agent.avatar, badge: agent.badge, balance: String(agent.balance), gameAgentId: agent.gameAgentId != null ? String(agent.gameAgentId) : '' })}>Edit</button>
-                        <button type="button" className="btn btn-light text-danger" onClick={async () => { if (window.confirm('Delete agent?')) { await fetch(`/api/users/${agent.id}`, { method: 'DELETE' }); loadAll(); } }}>Delete</button>
+                        <div className="table-actions agent-row-actions">
+                          <button type="button" className="btn btn-light btn-sm" onClick={() => setAgentForm({ id: agent.id, name: agent.name, username: agent.username, password: '', phone: agent.phone, avatar: agent.avatar, badge: agent.badge, balance: String(agent.balance), gameAgentId: agent.gameAgentId != null ? String(agent.gameAgentId) : '' })}>Edit</button>
+                          <button type="button" className="btn btn-light btn-sm text-danger" onClick={async () => { if (window.confirm('Delete agent?')) { await fetch(`/api/users/${agent.id}`, { method: 'DELETE' }); loadAll(); } }}>Delete</button>
+                        </div>
                       </td>
                     </tr>
                   ))}

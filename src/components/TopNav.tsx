@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import { Bell, Moon, MoreVertical, Sun } from 'lucide-react';
 import { useI18n } from '@/contexts/I18nContext';
 import { useTheme } from '@/contexts/ThemeContext';
 
@@ -10,6 +11,9 @@ type PublicSettings = {
   contactInfo: string;
   slogan: string;
 };
+
+const iconSize = 18;
+const iconStroke = 2;
 
 export default function TopNav() {
   const pathname = usePathname();
@@ -70,6 +74,24 @@ export default function TopNav() {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   };
 
+  const ThemeIcon = theme === 'light' ? Moon : Sun;
+
+  const notificationPanel = (
+    <>
+      <div className="notification-header">
+        <strong>{tr('notifications')}</strong>
+        <button type="button" onClick={markAllRead}>{tr('markAllRead')}</button>
+      </div>
+      {notifications.length ? notifications.map((n) => (
+        <div key={n.id} className={`notification-item ${n.read ? '' : 'unread'}`}>
+          <strong>{n.title}</strong>
+          <p>{n.body}</p>
+          <small>{new Date(n.createdAt).toLocaleString()}</small>
+        </div>
+      )) : <p className="text-muted">{tr('noData')}</p>}
+    </>
+  );
+
   return (
     <header className="top-nav">
       <div className="top-nav-left">
@@ -84,8 +106,8 @@ export default function TopNav() {
 
       <div className="top-nav-right top-nav-desktop">
         <div className="nav-controls">
-          <button type="button" className="nav-control-btn" onClick={toggleTheme} title={tr('theme')}>
-            {theme === 'light' ? '🌙' : '☀️'}
+          <button type="button" className="nav-control-btn nav-icon-btn" onClick={toggleTheme} title={tr('theme')} aria-label={tr('theme')}>
+            <ThemeIcon size={iconSize} strokeWidth={iconStroke} aria-hidden />
           </button>
           <select className="nav-lang-select" value={locale} onChange={(e) => setLocale(e.target.value as 'en' | 'am')} aria-label={tr('language')}>
             <option value="en">{tr('english')}</option>
@@ -93,23 +115,13 @@ export default function TopNav() {
           </select>
         </div>
         <div className="notification-wrap">
-          <button type="button" className="notification-btn" onClick={() => setShowNotifications((v) => !v)} aria-label={tr('notifications')}>
-            🔔
+          <button type="button" className="notification-btn nav-icon-btn" onClick={() => setShowNotifications((v) => !v)} aria-label={tr('notifications')}>
+            <Bell size={iconSize} strokeWidth={iconStroke} aria-hidden />
             {unread > 0 && <span className="notification-badge">{unread}</span>}
           </button>
           {showNotifications && (
             <div className="notification-dropdown">
-              <div className="notification-header">
-                <strong>{tr('notifications')}</strong>
-                <button type="button" onClick={markAllRead}>{tr('markAllRead')}</button>
-              </div>
-              {notifications.length ? notifications.map((n) => (
-                <div key={n.id} className={`notification-item ${n.read ? '' : 'unread'}`}>
-                  <strong>{n.title}</strong>
-                  <p>{n.body}</p>
-                  <small>{new Date(n.createdAt).toLocaleString()}</small>
-                </div>
-              )) : <p className="text-muted">{tr('noData')}</p>}
+              {notificationPanel}
             </div>
           )}
         </div>
@@ -122,23 +134,23 @@ export default function TopNav() {
       </div>
 
       <div className="top-nav-mobile-actions">
-        <button type="button" className="nav-control-btn" onClick={toggleTheme} title={tr('theme')}>
-          {theme === 'light' ? '🌙' : '☀️'}
+        <button type="button" className="nav-control-btn nav-icon-btn" onClick={toggleTheme} title={tr('theme')} aria-label={tr('theme')}>
+          <ThemeIcon size={iconSize} strokeWidth={iconStroke} aria-hidden />
         </button>
         <div className="notification-wrap">
-          <button type="button" className="notification-btn" onClick={() => setShowNotifications((v) => !v)} aria-label={tr('notifications')}>
-            🔔
+          <button type="button" className="notification-btn nav-icon-btn" onClick={() => setShowNotifications((v) => !v)} aria-label={tr('notifications')}>
+            <Bell size={iconSize} strokeWidth={iconStroke} aria-hidden />
             {unread > 0 && <span className="notification-badge">{unread}</span>}
           </button>
         </div>
         <button
           type="button"
-          className="nav-control-btn top-nav-more-btn"
+          className="nav-control-btn nav-icon-btn top-nav-more-btn"
           aria-label="More options"
           aria-expanded={showMobileMenu}
           onClick={() => setShowMobileMenu((v) => !v)}
         >
-          ⋮
+          <MoreVertical size={iconSize} strokeWidth={iconStroke} aria-hidden />
         </button>
       </div>
 
@@ -153,17 +165,7 @@ export default function TopNav() {
 
       {showNotifications && (
         <div className="notification-dropdown notification-dropdown-mobile">
-          <div className="notification-header">
-            <strong>{tr('notifications')}</strong>
-            <button type="button" onClick={markAllRead}>{tr('markAllRead')}</button>
-          </div>
-          {notifications.length ? notifications.map((n) => (
-            <div key={n.id} className={`notification-item ${n.read ? '' : 'unread'}`}>
-              <strong>{n.title}</strong>
-              <p>{n.body}</p>
-              <small>{new Date(n.createdAt).toLocaleString()}</small>
-            </div>
-          )) : <p className="text-muted">{tr('noData')}</p>}
+          {notificationPanel}
         </div>
       )}
 

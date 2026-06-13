@@ -117,6 +117,13 @@ button { cursor: pointer; }
   transition: background 0.15s;
 }
 .nav-control-btn:hover, .notification-btn:hover { background: var(--sidebar-hover); }
+.nav-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+}
+.nav-icon-btn svg { flex-shrink: 0; }
 .nav-lang-select {
   border: 1px solid var(--border);
   background: var(--input-bg);
@@ -484,7 +491,9 @@ button { cursor: pointer; }
 .btn-sm { padding: 6px 12px; font-size: 0.78rem; border-radius: 7px; }
 .btn-lg { padding: 13px 28px; font-size: 0.95rem; }
 .w-full { width: 100%; }
-.table-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+.table-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.agent-row-actions { gap: 10px; }
+.agent-row-actions .btn { min-width: 72px; }
 
 .text-muted { color: var(--text-muted); }
 .text-xs { font-size: 0.75rem; }
