@@ -5,9 +5,15 @@ import { I18nProvider } from '@/contexts/I18nContext';
 import TopNav from '@/components/TopNav';
 import ToastProvider from '@/components/ToastProvider';
 
+
 export const metadata: Metadata = {
   title: 'Edle Voucher Generator',
   description: 'Secure voucher management portal for Edle Bingo',
+  icons: {
+    icon: '/images/icon1.png',
+    shortcut: '/images/icon1.png',
+    apple: '/images/icon1.png',
+  },
 };
 
 export const viewport: Viewport = {
