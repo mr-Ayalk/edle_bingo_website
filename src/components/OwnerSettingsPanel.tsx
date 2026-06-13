@@ -63,8 +63,8 @@ export default function OwnerSettingsPanel({ settings, onChange, onSave }: Owner
             <FormField label="About title">
               <input className="form-control" value={settings.aboutTitle} onChange={(e) => set({ aboutTitle: e.target.value })} />
             </FormField>
-            <FormField label={tr('description')}>
-              <textarea className="form-control" rows={4} value={settings.aboutDescription} onChange={(e) => set({ aboutDescription: e.target.value })} />
+            <FormField label={tr('description')} hint="Press Enter twice to start a new paragraph">
+              <textarea className="form-control" rows={6} value={settings.aboutDescription} onChange={(e) => set({ aboutDescription: e.target.value })} />
             </FormField>
             <FormField label={tr('contact')}>
               <textarea className="form-control" rows={3} value={settings.contactInfo} onChange={(e) => set({ contactInfo: e.target.value })} />

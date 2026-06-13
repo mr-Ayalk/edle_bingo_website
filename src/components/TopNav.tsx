@@ -21,6 +21,7 @@ export default function TopNav() {
   });
   const [unread, setUnread] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [notifications, setNotifications] = useState<Array<{ id: number; title: string; body: string; read: boolean; createdAt: string }>>([]);
 
   useEffect(() => {
@@ -44,6 +45,11 @@ export default function TopNav() {
     load();
     const interval = window.setInterval(load, 4000);
     return () => window.clearInterval(interval);
+  }, [pathname]);
+
+  useEffect(() => {
+    setShowMobileMenu(false);
+    setShowNotifications(false);
   }, [pathname]);
 
   if (pathname === '/') return null;
@@ -75,7 +81,8 @@ export default function TopNav() {
           </div>
         </div>
       </div>
-      <div className="top-nav-right">
+
+      <div className="top-nav-right top-nav-desktop">
         <div className="nav-controls">
           <button type="button" className="nav-control-btn" onClick={toggleTheme} title={tr('theme')}>
             {theme === 'light' ? '🌙' : '☀️'}
@@ -113,6 +120,67 @@ export default function TopNav() {
           ))}
         </div>
       </div>
+
+      <div className="top-nav-mobile-actions">
+        <button type="button" className="nav-control-btn" onClick={toggleTheme} title={tr('theme')}>
+          {theme === 'light' ? '🌙' : '☀️'}
+        </button>
+        <div className="notification-wrap">
+          <button type="button" className="notification-btn" onClick={() => setShowNotifications((v) => !v)} aria-label={tr('notifications')}>
+            🔔
+            {unread > 0 && <span className="notification-badge">{unread}</span>}
+          </button>
+        </div>
+        <button
+          type="button"
+          className="nav-control-btn top-nav-more-btn"
+          aria-label="More options"
+          aria-expanded={showMobileMenu}
+          onClick={() => setShowMobileMenu((v) => !v)}
+        >
+          ⋮
+        </button>
+      </div>
+
+      {(showNotifications || showMobileMenu) && (
+        <button
+          type="button"
+          className="top-nav-mobile-backdrop"
+          aria-label="Close menu"
+          onClick={() => { setShowNotifications(false); setShowMobileMenu(false); }}
+        />
+      )}
+
+      {showNotifications && (
+        <div className="notification-dropdown notification-dropdown-mobile">
+          <div className="notification-header">
+            <strong>{tr('notifications')}</strong>
+            <button type="button" onClick={markAllRead}>{tr('markAllRead')}</button>
+          </div>
+          {notifications.length ? notifications.map((n) => (
+            <div key={n.id} className={`notification-item ${n.read ? '' : 'unread'}`}>
+              <strong>{n.title}</strong>
+              <p>{n.body}</p>
+              <small>{new Date(n.createdAt).toLocaleString()}</small>
+            </div>
+          )) : <p className="text-muted">{tr('noData')}</p>}
+        </div>
+      )}
+
+      {showMobileMenu && (
+        <div className="top-nav-mobile-menu">
+          <select className="nav-lang-select w-full" value={locale} onChange={(e) => setLocale(e.target.value as 'en' | 'am')} aria-label={tr('language')}>
+            <option value="en">{tr('english')}</option>
+            <option value="am">{tr('amharic')}</option>
+          </select>
+          <div className="nav-contact-badge">{tr('support')}</div>
+          <div className="nav-phones nav-phones-stack">
+            {phones.map((phone) => (
+              <a key={phone} href={`tel:${phone.replace(/\s/g, '')}`} className="phone-link">{phone}</a>
+            ))}
+          </div>
+        </div>
+      )}
     </header>
   );
 }

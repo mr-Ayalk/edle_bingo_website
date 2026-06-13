@@ -186,6 +186,7 @@ export default function ClientsPanel({ isOwner }: { isOwner: boolean }) {
 
       <div className="card fill-card clients-table">
         <div className="card-header"><h4 className="card-title">{tr('clients')}</h4></div>
+        <p className="table-scroll-hint">Swipe horizontally to see all columns</p>
         <div className="table-responsive">
           <table className="table table-hover">
             <thead>

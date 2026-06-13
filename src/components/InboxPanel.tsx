@@ -29,6 +29,7 @@ export default function InboxPanel({ currentUserId }: { currentUserId: number })
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editContent, setEditContent] = useState('');
+  const [mobileShowChat, setMobileShowChat] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const selectedContact = contacts.find((c) => c.id === selectedId);
@@ -63,6 +64,11 @@ export default function InboxPanel({ currentUserId }: { currentUserId: number })
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  const selectContact = (id: number) => {
+    setSelectedId(id);
+    setMobileShowChat(true);
+  };
 
   const sendMessage = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -114,7 +120,7 @@ export default function InboxPanel({ currentUserId }: { currentUserId: number })
   };
 
   return (
-    <div className="inbox-layout">
+    <div className={`inbox-layout ${mobileShowChat ? 'inbox-show-chat' : 'inbox-show-contacts'}`}>
       <aside className="inbox-contacts">
         <h4>{tr('inbox')}</h4>
         {contacts.map((c) => (
@@ -122,20 +128,29 @@ export default function InboxPanel({ currentUserId }: { currentUserId: number })
             key={c.id}
             type="button"
             className={`inbox-contact ${selectedId === c.id ? 'active' : ''}`}
-            onClick={() => setSelectedId(c.id)}
+            onClick={() => selectContact(c.id)}
           >
             <span className="inbox-avatar">{c.avatar || '👤'}</span>
-            <span>{c.name}</span>
+            <span className="inbox-contact-name">{c.name}</span>
           </button>
         ))}
       </aside>
+
       <div className="inbox-chat">
         {!selectedId ? (
           <div className="inbox-chat-header">{tr('selectAgent')}</div>
         ) : (
           <>
             <div className="inbox-chat-header">
-              {selectedContact?.name || tr('inbox')}
+              <button
+                type="button"
+                className="inbox-back-btn"
+                aria-label="Back to contacts"
+                onClick={() => setMobileShowChat(false)}
+              >
+                ←
+              </button>
+              <span>{selectedContact?.name || tr('inbox')}</span>
             </div>
             <div className="inbox-messages">
               {messages.map((m) => (
@@ -215,7 +230,7 @@ export default function InboxPanel({ currentUserId }: { currentUserId: number })
                 rows={3}
                 style={{ fontFamily }}
               />
-              <button type="submit" className="btn btn-primary">{tr('sendMessage')}</button>
+              <button type="submit" className="btn btn-primary w-full">{tr('sendMessage')}</button>
             </form>
           </>
         )}
