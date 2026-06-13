@@ -65,13 +65,14 @@ export default function TopNav() {
     .filter(Boolean);
 
   const markAllRead = async () => {
-    await fetch('/api/notifications', {
+    const res = await fetch('/api/notifications', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ markAllRead: true }),
     });
+    if (!res.ok) return;
     setUnread(0);
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+    setNotifications([]);
   };
 
   const ThemeIcon = theme === 'light' ? Moon : Sun;
@@ -80,15 +81,17 @@ export default function TopNav() {
     <>
       <div className="notification-header">
         <strong>{tr('notifications')}</strong>
-        <button type="button" onClick={markAllRead}>{tr('markAllRead')}</button>
+        {notifications.length > 0 && (
+          <button type="button" onClick={markAllRead}>{tr('markAllRead')}</button>
+        )}
       </div>
       {notifications.length ? notifications.map((n) => (
-        <div key={n.id} className={`notification-item ${n.read ? '' : 'unread'}`}>
+        <div key={n.id} className="notification-item unread">
           <strong>{n.title}</strong>
           <p>{n.body}</p>
           <small>{new Date(n.createdAt).toLocaleString()}</small>
         </div>
-      )) : <p className="text-muted">{tr('noData')}</p>}
+      )) : <p className="notification-empty">{tr('noData')}</p>}
     </>
   );
 

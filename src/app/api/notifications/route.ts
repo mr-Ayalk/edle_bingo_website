@@ -8,7 +8,7 @@ export async function GET() {
 
   const userId = Number(session.sub);
   const notifications = await prisma.notification.findMany({
-    where: { userId },
+    where: { userId, read: false },
     orderBy: { createdAt: 'desc' },
     take: 50,
   });
