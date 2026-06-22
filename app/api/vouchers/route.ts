@@ -32,9 +32,7 @@ export async function GET() {
   if (!user) return NextResponse.json({ message: 'User not found.' }, { status: 404 });
 
   const vouchers = await prisma.voucher.findMany({
-    where: {
-      OR: [{ agentUserId: userId }, ...(user.gameAgentId ? [{ gameAgentId: user.gameAgentId }] : [])],
-    },
+    where: { agentUserId: userId },
     orderBy: { createdAt: 'desc' },
   });
 
