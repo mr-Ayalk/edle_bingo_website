@@ -29,33 +29,49 @@ export async function getPublicSettings() {
   };
 }
 
-export async function seedDefaultUsers() {
-  const ownerCount = await prisma.user.count({ where: { role: 'OWNER' } });
-  if (ownerCount > 0) return;
+const DEFAULT_SEED_USERS = [
+  {
+    username: 'Owner2',
+    password: '12345678',
+    role: 'OWNER' as const,
+    name: 'Edle Owner',
+    phone: '+251951818822',
+    avatar: '🎖',
+    badge: '🎖',
+    gameAgentId: null as number | null,
+    balance: new Prisma.Decimal(0),
+  },
+  {
+    username: 'Ayalk',
+    password: '12345678',
+    role: 'AGENT' as const,
+    name: 'Agent One',
+    phone: '+251900000001',
+    avatar: '🧩',
+    badge: '🚩',
+    gameAgentId: 1,
+    balance: new Prisma.Decimal(10000),
+  },
+];
 
-  await prisma.user.createMany({
-    data: [
-      {
-        username: 'Owner',
-        passwordHash: await hashPassword('1234'),
-        role: 'OWNER',
-        name: 'Edle Owner',
-        phone: '+251951818822',
-        avatar: '🎖',
-        badge: '🎖',
-        balance: new Prisma.Decimal(0),
+/** Creates default users only when their username is not already in the database. */
+export async function seedDefaultUsers() {
+  for (const user of DEFAULT_SEED_USERS) {
+    const existing = await prisma.user.findUnique({ where: { username: user.username } });
+    if (existing) continue;
+
+    await prisma.user.create({
+      data: {
+        username: user.username,
+        passwordHash: await hashPassword(user.password),
+        role: user.role,
+        name: user.name,
+        phone: user.phone,
+        avatar: user.avatar,
+        badge: user.badge,
+        gameAgentId: user.gameAgentId,
+        balance: user.balance,
       },
-      {
-        username: 'agent1',
-        passwordHash: await hashPassword('1234'),
-        role: 'AGENT',
-        name: 'Agent One',
-        phone: '+251900000001',
-        avatar: '🧩',
-        badge: '🚩',
-        gameAgentId: 1,
-        balance: new Prisma.Decimal(10000),
-      },
-    ],
-  });
+    });
+  }
 }

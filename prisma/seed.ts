@@ -4,7 +4,7 @@ import { ensureAppSettings, seedDefaultUsers } from '../src/lib/settings';
 async function main() {
   await ensureAppSettings();
   await seedDefaultUsers();
-  console.log('Database seeded successfully.');
+  console.log('Seed complete. Only missing default users were added; existing data was not changed.');
 }
 
 main()

@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { formatNumber } from './format';
 
 /** Parse monetary input without floating-point drift (e.g. 400 stays 400). */
 export function parseMoney(value: unknown): Prisma.Decimal {
@@ -27,10 +28,7 @@ export function moneyToNumber(value: Prisma.Decimal | string | number): number {
 }
 
 export function formatMoney(value: Prisma.Decimal | string | number): string {
-  return moneyToNumber(value).toLocaleString(undefined, {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  });
+  return formatNumber(moneyToNumber(value));
 }
 
 export function subtractMoney(
