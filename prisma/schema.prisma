@@ -17,6 +17,15 @@ enum VoucherStatus {
   USED
 }
 
+enum DownloadCategory {
+  SETUP
+  NODE
+  APK_CARTELA
+  PNG_CARTELA
+  CARTELA_SYSTEM
+  ANYDESK
+}
+
 model User {
   id          Int       @id @default(autoincrement())
   username    String    @unique
@@ -127,4 +136,23 @@ model AppSettings {
   updatedAt             DateTime @updatedAt @map("updated_at")
 
   @@map("app_settings")
+}
+
+model DownloadAsset {
+  id          Int              @id @default(autoincrement())
+  category    DownloadCategory
+  name        String
+  description String           @default("")
+  fileName    String           @map("file_name")
+  filePath    String           @map("file_path")
+  fileSize    Int              @map("file_size")
+  mimeType    String           @default("") @map("mime_type")
+  visible     Boolean          @default(true)
+  sortOrder   Int              @default(0) @map("sort_order")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
+
+  @@index([category])
+  @@index([visible])
+  @@map("download_assets")
 }

@@ -818,6 +818,142 @@ button { cursor: pointer; }
 .downloads-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 20px; }
 .download-card h3 { margin-top: 0; }
 .downloads-note { font-size: 0.85rem; line-height: 1.5; word-break: break-word; }
+.downloads-subtitle { margin: 4px 0 0; font-size: 0.9rem; }
+.downloads-empty { text-align: center; padding: 32px 16px; }
+.downloads-sections { display: flex; flex-direction: column; gap: 20px; }
+.downloads-section-header { display: flex; align-items: center; gap: 14px; }
+.downloads-section-icon { font-size: 1.75rem; line-height: 1; }
+.downloads-section-body { display: flex; flex-direction: column; gap: 12px; padding-top: 8px !important; }
+.download-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  background: var(--bg);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.download-item-info h4 { margin: 0 0 4px; font-size: 0.95rem; }
+.download-item-info p { margin: 0 0 4px; font-size: 0.85rem; }
+.download-item-btn { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; }
+
+/* ── Owner Uploads ── */
+.uploads-panel { display: flex; flex-direction: column; gap: 20px; }
+.uploads-intro h3 { margin: 0 0 8px; }
+.uploads-intro p { margin: 0; font-size: 0.9rem; line-height: 1.6; }
+
+.uploads-category-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.uploads-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  transition: all 0.15s;
+}
+.uploads-tab:hover { background: var(--sidebar-hover); color: var(--text); }
+.uploads-tab.active {
+  background: var(--primary-soft);
+  border-color: rgba(99,102,241,0.35);
+  color: var(--primary);
+  font-weight: 600;
+}
+.uploads-tab-icon { font-size: 1.1rem; line-height: 1; }
+.uploads-tab-count {
+  background: var(--primary);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  min-width: 20px;
+  text-align: center;
+}
+.uploads-tab.active .uploads-tab-count { background: var(--primary); }
+
+.uploads-category-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.uploads-limit-badge {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg);
+  padding: 6px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.uploads-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.uploads-form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.uploads-visible-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  color: var(--text);
+  grid-column: 1 / -1;
+  cursor: pointer;
+}
+.uploads-visible-check input { width: 16px; height: 16px; accent-color: var(--primary); }
+.uploads-limit-msg {
+  padding: 12px 16px;
+  background: var(--bg);
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 0.88rem;
+}
+.uploads-file-list { display: flex; flex-direction: column; gap: 10px; }
+.uploads-empty { text-align: center; padding: 24px 0; }
+.uploads-file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  flex-wrap: wrap;
+}
+.uploads-file-item.hidden-file { opacity: 0.72; border-style: dashed; }
+.uploads-file-info { flex: 1; min-width: 200px; }
+.uploads-file-info strong { display: block; margin-bottom: 4px; }
+.uploads-file-info p { margin: 0 0 4px; font-size: 0.85rem; }
+.uploads-file-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.uploads-file-actions .btn { display: inline-flex; align-items: center; gap: 5px; }
+.uploads-hidden-btn { color: var(--text-muted); }
+.uploads-edit-form { width: 100%; display: flex; flex-direction: column; gap: 12px; }
+
+@media (max-width: 768px) {
+  .uploads-form-grid { grid-template-columns: 1fr; }
+  .uploads-file-item { flex-direction: column; align-items: stretch; }
+  .uploads-file-actions { width: 100%; }
+  .uploads-file-actions .btn { flex: 1; justify-content: center; }
+  .download-item { flex-direction: column; align-items: stretch; }
+  .download-item-btn { width: 100%; justify-content: center; }
+}
 
 /* ── Responsive ── */
 

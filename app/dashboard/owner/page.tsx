@@ -9,6 +9,7 @@ import DashboardShell, {
   IconInbox,
   IconReport,
   IconSettings,
+  IconUpload,
   IconUsers,
 } from '@/components/DashboardShell';
 import AboutSection from '@/components/AboutSection';
@@ -16,6 +17,7 @@ import CopyButton from '@/components/CopyButton';
 import InboxPanel from '@/components/InboxPanel';
 import ClientsPanel from '@/components/ClientsPanel';
 import OwnerSettingsPanel from '@/components/OwnerSettingsPanel';
+import UploadsPanel from '@/components/UploadsPanel';
 import FormField from '@/components/FormField';
 import { BADGES } from '@/lib/constants';
 import { formatBirr } from '@/lib/format';
@@ -215,6 +217,7 @@ export default function OwnerDashboardPage() {
     { id: 'topup', labelKey: 'topUp' as const, icon: <IconCard /> },
     { id: 'report', labelKey: 'reports' as const, icon: <IconReport /> },
     { id: 'clients', labelKey: 'clients' as const, icon: <IconClients /> },
+    { id: 'uploads', labelKey: 'uploads' as const, icon: <IconUpload /> },
     { id: 'inbox', labelKey: 'inbox' as const, icon: <IconInbox />, heading: tr('preferences') },
     { id: 'settings', labelKey: 'settings' as const, icon: <IconSettings /> },
   ];
@@ -421,6 +424,7 @@ export default function OwnerDashboardPage() {
       )}
 
       {section === 'clients' && <ClientsPanel isOwner />}
+      {section === 'uploads' && <UploadsPanel />}
       {section === 'inbox' && user && <InboxPanel currentUserId={user.id} />}
 
       {section === 'settings' && (

@@ -4,8 +4,9 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   experimental: {
     serverActions: {
-      bodySizeLimit: '10mb',
+      bodySizeLimit: '250mb',
     },
+    middlewareClientMaxBodySize: '250mb',
   },
 };
 

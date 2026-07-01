@@ -1,23 +1,33 @@
 import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
 import { requireRole } from '@/lib/api-auth';
-
-const DOWNLOADS = [
-  {
-    id: 'edle-bingo',
-    name: 'EDLE_BINGO.exe',
-    description: 'Edle Bingo desktop application',
-    file: '/downloads/EDLE_BINGO.exe',
-  },
-  {
-    id: 'nodejs',
-    name: 'Node.js Runtime',
-    description: 'Required Node.js runtime for Edle Bingo',
-    file: '/downloads/nodejs-installer.msi',
-  },
-];
+import { DOWNLOAD_CATEGORIES } from '@/lib/download-categories';
 
 export async function GET() {
   const session = await requireRole('DOWNLOADER');
   if (session instanceof NextResponse) return session;
-  return NextResponse.json({ downloads: DOWNLOADS });
+
+  const assets = await prisma.downloadAsset.findMany({
+    where: { visible: true },
+    orderBy: [{ category: 'asc' }, { sortOrder: 'asc' }, { createdAt: 'desc' }],
+  });
+
+  const grouped = DOWNLOAD_CATEGORIES.map((cat) => ({
+    category: cat.id,
+    label: cat.label,
+    description: cat.description,
+    icon: cat.icon,
+    files: assets
+      .filter((a) => a.category === cat.id)
+      .map((a) => ({
+        id: a.id,
+        name: a.name,
+        description: a.description,
+        fileName: a.fileName,
+        file: a.filePath,
+        fileSize: a.fileSize,
+      })),
+  })).filter((g) => g.files.length > 0);
+
+  return NextResponse.json({ downloads: grouped });
 }
