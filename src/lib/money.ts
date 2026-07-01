@@ -12,7 +12,7 @@ export function parseMoney(value: unknown): Prisma.Decimal {
   }
 
   if (typeof value === 'string') {
-    const trimmed = value.trim();
+    const trimmed = value.replace(/,/g, '').trim();
     if (!trimmed) throw new Error('Invalid amount.');
     const parsed = Number(trimmed);
     if (!Number.isFinite(parsed)) throw new Error('Invalid amount.');

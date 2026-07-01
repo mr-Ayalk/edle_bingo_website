@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useI18n } from '@/contexts/I18nContext';
-import { formatBirr } from '@/lib/format';
+import { formatBirr, formatAmountInputRaw, parseAmountInput } from '@/lib/format';
 import FormField from '@/components/FormField';
+import MoneyInput from '@/components/MoneyInput';
 import { toast } from '@/components/ToastProvider';
 
 type Client = {
@@ -72,7 +73,7 @@ export default function ClientsPanel({ isOwner }: { isOwner: boolean }) {
       wereda: form.wereda,
       kebele: form.kebele,
       addressDetail: form.addressDetail,
-      packageAmount: Number(form.packageAmount) || 0,
+      packageAmount: parseAmountInput(form.packageAmount) || 0,
     };
 
     const url = form.id ? `/api/clients/${form.id}` : '/api/clients';
@@ -117,7 +118,7 @@ export default function ClientsPanel({ isOwner }: { isOwner: boolean }) {
       wereda: client.wereda,
       kebele: client.kebele,
       addressDetail: client.addressDetail,
-      packageAmount: String(client.packageAmount),
+      packageAmount: formatAmountInputRaw(String(client.packageAmount)),
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -173,7 +174,7 @@ export default function ClientsPanel({ isOwner }: { isOwner: boolean }) {
                 <input className="form-control" value={form.addressDetail} onChange={(e) => set({ addressDetail: e.target.value })} />
               </FormField>
               <FormField label={tr('packageAmount')}>
-                <input className="form-control" type="number" step="0.01" value={form.packageAmount} onChange={(e) => set({ packageAmount: e.target.value })} />
+                <MoneyInput value={form.packageAmount} onChange={(packageAmount) => set({ packageAmount })} />
               </FormField>
               <div className="form-actions">
                 <button type="submit" className="btn btn-primary">{tr('save')}</button>

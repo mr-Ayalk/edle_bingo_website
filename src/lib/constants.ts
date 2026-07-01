@@ -1,4 +1,12 @@
-import { randomInt } from 'crypto';
+function randomInt(min: number, max: number): number {
+  const range = max - min;
+  if (typeof globalThis.crypto !== 'undefined' && 'getRandomValues' in globalThis.crypto) {
+    const arr = new Uint32Array(1);
+    globalThis.crypto.getRandomValues(arr);
+    return min + (arr[0] % range);
+  }
+  return Math.floor(Math.random() * range) + min;
+}
 
 export function generateVoucherCode(): string {
   const part = () => String(randomInt(0, 1000)).padStart(3, '0');

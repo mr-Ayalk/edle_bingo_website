@@ -14,8 +14,9 @@ import CopyButton from '@/components/CopyButton';
 import InboxPanel from '@/components/InboxPanel';
 import ClientsPanel from '@/components/ClientsPanel';
 import FormField from '@/components/FormField';
-import { generateVoucherCode } from '@/lib/constants';
-import { formatBirr } from '@/lib/format';
+import MoneyInput from '@/components/MoneyInput';
+import { formatBirr, parseAmountInput } from '@/lib/format';
+import { parseJsonResponse } from '@/lib/api-client';
 import ClientDate from '@/components/ClientDate';
 import { toast } from '@/components/ToastProvider';
 import { useI18n } from '@/contexts/I18nContext';
@@ -94,20 +95,25 @@ export default function AgentDashboardPage() {
 
   const generate = async (e: React.FormEvent) => {
     e.preventDefault();
+    const parsedAmount = parseAmountInput(amount);
+    if (!amount.trim() || !Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+      toast.error(tr('amountEmpty'));
+      return;
+    }
     const res = await fetch('/api/vouchers', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        amount: Number(amount),
-        code: code.trim() || generateVoucherCode(),
+        amount: parsedAmount,
+        ...(code.trim() ? { code: code.trim() } : {}),
       }),
     });
-    const data = await res.json();
+    const data = await parseJsonResponse<{ message?: string; user?: User }>(res);
     if (!res.ok) {
-      toast.error(data.message);
+      toast.error(data.message || tr('saveFailed'));
       return;
     }
-    setUser(data.user);
+    if (data.user) setUser(data.user);
     toast.success(tr('voucherGenerated'));
     setAmount('');
     setCode('');
@@ -194,7 +200,7 @@ export default function AgentDashboardPage() {
                 <input className="form-control" readOnly value={formatBirr(user.balance)} />
               </FormField>
               <FormField label={tr('voucherAmount')}>
-                <input className="form-control" type="number" step="0.01" min="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} required />
+                <MoneyInput value={amount} onChange={setAmount} required />
               </FormField>
               <FormField label={tr('customCode')}>
                 <input className="form-control" value={code} onChange={(e) => setCode(e.target.value)} placeholder="391-143-6825" />

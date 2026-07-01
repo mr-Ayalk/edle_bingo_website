@@ -19,8 +19,11 @@ import ClientsPanel from '@/components/ClientsPanel';
 import OwnerSettingsPanel from '@/components/OwnerSettingsPanel';
 import UploadsPanel from '@/components/UploadsPanel';
 import FormField from '@/components/FormField';
+import MoneyInput from '@/components/MoneyInput';
+import HoverSelect from '@/components/HoverSelect';
 import { BADGES } from '@/lib/constants';
-import { formatBirr } from '@/lib/format';
+import { formatBirr, parseAmountInput } from '@/lib/format';
+import { parseJsonResponse } from '@/lib/api-client';
 import ClientDate from '@/components/ClientDate';
 import { OWNER_SECTION_KEYS, translateVoucherStatus } from '@/lib/i18n/translations';
 import { toast } from '@/components/ToastProvider';
@@ -156,7 +159,7 @@ export default function OwnerDashboardClient() {
       phone: agentForm.phone.trim(),
       avatar: agentForm.avatar,
       badge: agentForm.badge,
-      balance: Number(agentForm.balance) || 0,
+      balance: parseAmountInput(agentForm.balance) || 0,
       gameAgentId: agentForm.gameAgentId ? Number(agentForm.gameAgentId) : null,
     };
     if (!payload.name || !payload.username || (!agentForm.id && !payload.password)) {
@@ -378,7 +381,7 @@ export default function OwnerDashboardClient() {
                   <input className="form-control" type="number" value={agentForm.gameAgentId} onChange={(e) => setAgentForm({ ...agentForm, gameAgentId: e.target.value })} />
                 </FormField>
                 <FormField label={tr('initialCredit')}>
-                  <input className="form-control" type="number" min="0" step="0.01" value={agentForm.balance} onChange={(e) => setAgentForm({ ...agentForm, balance: e.target.value })} />
+                  <MoneyInput value={agentForm.balance} onChange={(balance) => setAgentForm({ ...agentForm, balance })} />
                 </FormField>
                 <button type="submit" className="btn btn-primary">{tr('save')}</button>
               </form>
@@ -392,24 +395,39 @@ export default function OwnerDashboardClient() {
           <div className="card-body">
             <form onSubmit={async (e) => {
               e.preventDefault();
-              const res = await fetch(`/api/users/${topUp.agentId}/topup`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ amount: Number(topUp.amount) }) });
-              const data = await res.json();
+              if (!topUp.agentId) {
+                toast.error(tr('selectAgentRequired'));
+                return;
+              }
+              const amount = parseAmountInput(topUp.amount);
+              if (!topUp.amount.trim() || !Number.isFinite(amount) || amount <= 0) {
+                toast.error(tr('amountEmpty'));
+                return;
+              }
+              const res = await fetch(`/api/users/${topUp.agentId}/topup`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount }),
+              });
+              const data = await parseJsonResponse(res);
               if (!res.ok) {
-                toast.error(data.message);
+                toast.error(data.message || tr('saveFailed'));
                 return;
               }
               toast.success(tr('topUpCompleted'));
-              setTopUp({ agentId: '', amount: '' });
+              setTopUp((prev) => ({ ...prev, amount: '' }));
               loadAll();
             }} className="form-layout">
               <FormField label={tr('agent')}>
-                <select className="form-control" value={topUp.agentId} onChange={(e) => setTopUp({ ...topUp, agentId: e.target.value })}>
-                  <option value="">{tr('selectAgentOption')}</option>
-                  {activeAgents.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
-                </select>
+                <HoverSelect
+                  value={topUp.agentId}
+                  onChange={(agentId) => setTopUp({ ...topUp, agentId })}
+                  placeholder={tr('selectAgentOption')}
+                  options={activeAgents.map((a) => ({ value: String(a.id), label: a.name }))}
+                />
               </FormField>
               <FormField label={tr('amountBirr')}>
-                <input className="form-control" type="number" step="0.01" min="0.01" value={topUp.amount} onChange={(e) => setTopUp({ ...topUp, amount: e.target.value })} />
+                <MoneyInput value={topUp.amount} onChange={(amount) => setTopUp({ ...topUp, amount })} />
               </FormField>
               <button type="submit" className="btn btn-primary">{tr('topUp')}</button>
             </form>

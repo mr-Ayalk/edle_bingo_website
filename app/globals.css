@@ -473,6 +473,56 @@ button { cursor: pointer; }
 }
 
 .form-control::placeholder { color: var(--text-muted); opacity: 0.7; }
+
+.hover-select {
+  position: relative;
+  width: 100%;
+}
+.hover-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  text-align: left;
+  cursor: pointer;
+}
+.hover-select-placeholder { color: var(--text-muted); }
+.hover-select-chevron {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+.hover-select-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 50;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px var(--shadow);
+  max-height: 240px;
+  overflow-y: auto;
+}
+.hover-select-menu li button {
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+.hover-select-menu li button:hover,
+.hover-select-menu li button.is-selected {
+  background: var(--sidebar-hover);
+}
 .client-form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
 .form-actions { grid-column: 1 / -1; display: flex; gap: 10px; flex-wrap: wrap; }
 .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
