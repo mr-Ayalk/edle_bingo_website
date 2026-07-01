@@ -61,7 +61,7 @@ export default function DashboardShell({
         <button
           type="button"
           className="sidebar-backdrop"
-          aria-label="Close menu"
+          aria-label={tr('closeMenu')}
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -79,7 +79,7 @@ export default function DashboardShell({
           <button
             type="button"
             className="sidebar-close-btn"
-            aria-label="Close menu"
+            aria-label={tr('closeMenu')}
             onClick={() => setSidebarOpen(false)}
           >
             ✕
@@ -120,7 +120,7 @@ export default function DashboardShell({
             <button
               type="button"
               className="sidebar-toggle-btn"
-              aria-label="Open menu"
+              aria-label={tr('openMenu')}
               aria-expanded={sidebarOpen}
               onClick={() => setSidebarOpen(true)}
             >

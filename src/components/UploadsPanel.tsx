@@ -5,10 +5,11 @@ import type { DownloadCategory } from '@prisma/client';
 import { Eye, EyeOff, Pencil, Trash2, Upload } from 'lucide-react';
 import FormField from '@/components/FormField';
 import { toast } from '@/components/ToastProvider';
+import { useI18n } from '@/contexts/I18nContext';
 import {
   DOWNLOAD_CATEGORIES,
   formatFileSize,
-  getCategoryMeta,
+  getLocalizedCategory,
 } from '@/lib/download-categories';
 
 type Asset = {
@@ -28,6 +29,7 @@ type EditState = { id: number; name: string; description: string } | null;
 const emptyUpload = { name: '', description: '', visible: true };
 
 export default function UploadsPanel() {
+  const { tr } = useI18n();
   const [assets, setAssets] = useState<Asset[]>([]);
   const [activeCategory, setActiveCategory] = useState<DownloadCategory>('SETUP');
   const [uploadForms, setUploadForms] = useState<Record<string, typeof emptyUpload & { file: File | null }>>({});
@@ -55,18 +57,18 @@ export default function UploadsPanel() {
   };
 
   const categoryAssets = assets.filter((a) => a.category === activeCategory);
-  const meta = getCategoryMeta(activeCategory);
+  const meta = getLocalizedCategory(activeCategory, tr);
   const atLimit = meta.maxFiles !== null && categoryAssets.length >= meta.maxFiles;
   const form = getForm(activeCategory);
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.file) {
-      toast.error('Please select a file.');
+      toast.error(tr('selectFileRequired'));
       return;
     }
     if (!form.name.trim()) {
-      toast.error('Display name is required.');
+      toast.error(tr('displayNameRequired'));
       return;
     }
 
@@ -82,16 +84,16 @@ export default function UploadsPanel() {
       const res = await fetch('/api/uploads', { method: 'POST', body });
       const data = await res.json();
       if (!res.ok) {
-        toast.error(data.message || 'Upload failed.');
+        toast.error(data.message || tr('uploadFailed'));
         return;
       }
-      toast.success('File uploaded.');
+      toast.success(tr('fileUploaded'));
       setForm(activeCategory, { name: '', description: '', file: null, visible: true });
       const input = document.getElementById(`file-${activeCategory}`) as HTMLInputElement | null;
       if (input) input.value = '';
       load();
     } catch {
-      toast.error('Upload failed. Check file size and connection.');
+      toast.error(tr('uploadFailed'));
     } finally {
       setUploading(null);
     }
@@ -104,10 +106,10 @@ export default function UploadsPanel() {
       body: JSON.stringify({ visible: !asset.visible }),
     });
     if (res.ok) {
-      toast.success(asset.visible ? 'Hidden from downloads page.' : 'Now visible on downloads page.');
+      toast.success(asset.visible ? tr('visibilityHidden') : tr('visibilityShown'));
       load();
     } else {
-      toast.error('Could not update visibility.');
+      toast.error(tr('couldNotUpdateVisibility'));
     }
   };
 
@@ -119,22 +121,22 @@ export default function UploadsPanel() {
       body: JSON.stringify({ name: edit.name, description: edit.description }),
     });
     if (res.ok) {
-      toast.success('Updated.');
+      toast.success(tr('updated'));
       setEdit(null);
       load();
     } else {
-      toast.error('Could not save changes.');
+      toast.error(tr('couldNotSave'));
     }
   };
 
   const remove = async (asset: Asset) => {
-    if (!window.confirm(`Delete "${asset.name}"? This cannot be undone.`)) return;
+    if (!window.confirm(`${tr('deleteClient')} "${asset.name}"?`)) return;
     const res = await fetch(`/api/uploads/${asset.id}`, { method: 'DELETE' });
     if (res.ok) {
-      toast.success('File deleted.');
+      toast.success(tr('fileDeleted'));
       load();
     } else {
-      toast.error('Could not delete file.');
+      toast.error(tr('couldNotDeleteFile'));
     }
   };
 
@@ -142,16 +144,14 @@ export default function UploadsPanel() {
     <div className="uploads-panel">
       <div className="uploads-intro card">
         <div className="card-body">
-          <h3>Download Portal Files</h3>
-          <p className="text-muted">
-            Upload files for the download portal. Toggle visibility to control what download users can see.
-            Hidden files stay saved but won&apos;t appear on the downloads page.
-          </p>
+          <h3>{tr('uploadPortalTitle')}</h3>
+          <p className="text-muted">{tr('uploadPortalDesc')}</p>
         </div>
       </div>
 
       <div className="uploads-category-tabs">
         {DOWNLOAD_CATEGORIES.map((cat) => {
+          const localized = getLocalizedCategory(cat.id, tr);
           const count = assets.filter((a) => a.category === cat.id).length;
           return (
             <button
@@ -161,7 +161,7 @@ export default function UploadsPanel() {
               onClick={() => setActiveCategory(cat.id)}
             >
               <span className="uploads-tab-icon">{cat.icon}</span>
-              <span className="uploads-tab-label">{cat.label}</span>
+              <span className="uploads-tab-label">{localized.label}</span>
               {count > 0 && <span className="uploads-tab-count">{count}</span>}
             </button>
           );
@@ -175,7 +175,7 @@ export default function UploadsPanel() {
             <p className="text-muted text-xs">{meta.hint}</p>
           </div>
           <span className="uploads-limit-badge">
-            {categoryAssets.length}{meta.maxFiles !== null ? ` / ${meta.maxFiles}` : ''} files
+            {categoryAssets.length}{meta.maxFiles !== null ? ` / ${meta.maxFiles}` : ''} {tr('files')}
           </span>
         </div>
 
@@ -183,23 +183,26 @@ export default function UploadsPanel() {
           {!atLimit && (
             <form onSubmit={handleUpload} className="uploads-form">
               <div className="uploads-form-grid">
-                <FormField label="Display name">
+                <FormField label={tr('displayName')}>
                   <input
                     className="form-control"
                     value={form.name}
                     onChange={(e) => setForm(activeCategory, { name: e.target.value })}
-                    placeholder={`e.g. ${meta.label} file`}
+                    placeholder={meta.label}
                   />
                 </FormField>
-                <FormField label="Description">
+                <FormField label={tr('description')}>
                   <input
                     className="form-control"
                     value={form.description}
                     onChange={(e) => setForm(activeCategory, { description: e.target.value })}
-                    placeholder="Short description for download users"
+                    placeholder={tr('descriptionPlaceholder')}
                   />
                 </FormField>
-                <FormField label="File" hint={`Accepted: ${meta.extensions.join(', ')} · Max ${meta.maxSizeMb} MB`}>
+                <FormField
+                  label={tr('uploadFile')}
+                  hint={`${tr('accepted')}: ${meta.extensions.join(', ')} · ${tr('maxSize')} ${meta.maxSizeMb} MB`}
+                >
                   <input
                     id={`file-${activeCategory}`}
                     type="file"
@@ -214,7 +217,7 @@ export default function UploadsPanel() {
                     checked={form.visible}
                     onChange={(e) => setForm(activeCategory, { visible: e.target.checked })}
                   />
-                  Visible on downloads page
+                  {tr('visibleOnDownloads')}
                 </label>
               </div>
               <button
@@ -223,33 +226,31 @@ export default function UploadsPanel() {
                 disabled={uploading === activeCategory}
               >
                 <Upload size={16} />
-                {uploading === activeCategory ? 'Uploading…' : 'Upload file'}
+                {uploading === activeCategory ? tr('uploading') : tr('uploadFile')}
               </button>
             </form>
           )}
 
           {atLimit && (
-            <p className="uploads-limit-msg text-muted">
-              Maximum files reached for this category. Delete an existing file to upload a new one.
-            </p>
+            <p className="uploads-limit-msg text-muted">{tr('maxFilesReached')}</p>
           )}
 
           <div className="uploads-file-list">
             {categoryAssets.length === 0 ? (
-              <p className="text-muted uploads-empty">No files uploaded in this category yet.</p>
+              <p className="text-muted uploads-empty">{tr('noFilesInCategory')}</p>
             ) : (
               categoryAssets.map((asset) => (
                 <div key={asset.id} className={`uploads-file-item ${asset.visible ? '' : 'hidden-file'}`}>
                   {edit?.id === asset.id ? (
                     <div className="uploads-edit-form">
-                      <FormField label="Display name">
+                      <FormField label={tr('displayName')}>
                         <input
                           className="form-control"
                           value={edit.name}
                           onChange={(e) => setEdit({ ...edit, name: e.target.value })}
                         />
                       </FormField>
-                      <FormField label="Description">
+                      <FormField label={tr('description')}>
                         <input
                           className="form-control"
                           value={edit.description}
@@ -257,8 +258,8 @@ export default function UploadsPanel() {
                         />
                       </FormField>
                       <div className="table-actions">
-                        <button type="button" className="btn btn-primary btn-sm" onClick={saveEdit}>Save</button>
-                        <button type="button" className="btn btn-light btn-sm" onClick={() => setEdit(null)}>Cancel</button>
+                        <button type="button" className="btn btn-primary btn-sm" onClick={saveEdit}>{tr('save')}</button>
+                        <button type="button" className="btn btn-light btn-sm" onClick={() => setEdit(null)}>{tr('cancel')}</button>
                       </div>
                     </div>
                   ) : (
@@ -274,21 +275,21 @@ export default function UploadsPanel() {
                         <button
                           type="button"
                           className={`btn btn-sm ${asset.visible ? 'btn-light' : 'btn-light uploads-hidden-btn'}`}
-                          title={asset.visible ? 'Hide from downloads' : 'Show on downloads'}
+                          title={asset.visible ? tr('hideFromDownloads') : tr('showOnDownloads')}
                           onClick={() => toggleVisible(asset)}
                         >
                           {asset.visible ? <Eye size={15} /> : <EyeOff size={15} />}
-                          {asset.visible ? 'Visible' : 'Hidden'}
+                          {asset.visible ? tr('visible') : tr('hidden')}
                         </button>
                         <button
                           type="button"
                           className="btn btn-light btn-sm"
                           onClick={() => setEdit({ id: asset.id, name: asset.name, description: asset.description })}
                         >
-                          <Pencil size={15} /> Edit
+                          <Pencil size={15} /> {tr('edit')}
                         </button>
                         <button type="button" className="btn btn-danger btn-sm" onClick={() => remove(asset)}>
-                          <Trash2 size={15} /> Delete
+                          <Trash2 size={15} /> {tr('deleteClient')}
                         </button>
                       </div>
                     </>

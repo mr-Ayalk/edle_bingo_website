@@ -18,6 +18,7 @@ import { generateVoucherCode } from '@/lib/constants';
 import { formatBirr } from '@/lib/format';
 import { toast } from '@/components/ToastProvider';
 import { useI18n } from '@/contexts/I18nContext';
+import { AGENT_SECTION_KEYS, translateVoucherStatus } from '@/lib/i18n/translations';
 
 type User = {
   id: number;
@@ -106,7 +107,7 @@ export default function AgentDashboardPage() {
       return;
     }
     setUser(data.user);
-    toast.success('Voucher generated.');
+    toast.success(tr('voucherGenerated'));
     setAmount('');
     setCode('');
     setSection('dashboard');
@@ -129,8 +130,8 @@ export default function AgentDashboardPage() {
       section={section}
       onSectionChange={setSection}
       navItems={navItems}
-      sectionTitle={section === 'generate' ? tr('generateVoucher') : tr('dashboard')}
-      breadcrumb={`Agent / ${section}`}
+      sectionTitle={tr(AGENT_SECTION_KEYS[section] ?? 'dashboard')}
+      breadcrumb={`${tr('agent')} / ${tr(AGENT_SECTION_KEYS[section] ?? 'dashboard')}`}
       onLogout={logout}
     >
       {section === 'dashboard' && (
@@ -146,7 +147,7 @@ export default function AgentDashboardPage() {
             </div>
             <div className="metric-card bg-gradient-success">
               <div className="metric-card-body">
-                <h4 className="metric-title">Active Vouchers</h4>
+                <h4 className="metric-title">{tr('activeVouchers')}</h4>
                 <h2 className="metric-value">{vouchers.filter((v) => v.status === 'active').length}</h2>
               </div>
               <div className="circle-pattern" />
@@ -172,7 +173,7 @@ export default function AgentDashboardPage() {
                       <td className="copy-cell"><CopyButton text={v.code} /><strong>{v.code}</strong></td>
                       <td>{formatBirr(v.amount)}</td>
                       <td>{new Date(v.createdAt).toLocaleDateString()}</td>
-                      <td><span className={`status-badge status-${v.status}`}>{v.status}</span></td>
+                      <td><span className={`status-badge status-${v.status}`}>{translateVoucherStatus(v.status, tr)}</span></td>
                     </tr>
                   )) : (
                     <tr><td colSpan={4}>{tr('noData')}</td></tr>

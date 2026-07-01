@@ -7,11 +7,11 @@ import { toast } from '@/components/ToastProvider';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { tr } = useI18n();
+  const { tr, locale, setLocale } = useI18n();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [contactInfo, setContactInfo] = useState('Contact us - DM\n+251951818822\n+251723358806');
+  const [contactPhones, setContactPhones] = useState('+251951818822\n+251723358806');
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -24,7 +24,7 @@ export default function LoginPage() {
     fetch('/api/settings/public')
       .then((r) => r.json())
       .then((data) => {
-        if (data.contactInfo) setContactInfo(`Contact us - DM\n${data.contactInfo}`);
+        if (data.contactInfo) setContactPhones(data.contactInfo);
       })
       .catch(() => undefined);
   }, [router]);
@@ -40,7 +40,7 @@ export default function LoginPage() {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || tr('invalidLogin'));
-      toast.success('Welcome back!');
+      toast.success(tr('welcomeBack'));
       router.push(data.redirect);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : tr('invalidLogin'));
@@ -61,6 +61,17 @@ export default function LoginPage() {
             height={48}
             className="split-login-icon"
           />
+          <div className="split-login-lang">
+            <select
+              className="nav-lang-select"
+              value={locale}
+              onChange={(e) => setLocale(e.target.value as 'en' | 'am')}
+              aria-label={tr('language')}
+            >
+              <option value="en">{tr('english')}</option>
+              <option value="am">{tr('amharic')}</option>
+            </select>
+          </div>
           <h1 className="split-login-title">{tr('signInPortal')}</h1>
           <div className="split-login-card">
             <form onSubmit={handleLogin} className="split-login-form">
@@ -87,10 +98,10 @@ export default function LoginPage() {
                 />
               </label>
               <button type="submit" className="split-login-button" disabled={loading}>
-                {loading ? 'Signing in…' : tr('signIn')}
+                {loading ? tr('signingIn') : tr('signIn')}
               </button>
             </form>
-            <div className="split-contact">{contactInfo}</div>
+            <div className="split-contact">{`${tr('contactUs')}\n${contactPhones}`}</div>
           </div>
         </div>
       </div>

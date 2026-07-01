@@ -149,7 +149,7 @@ export default function TopNav() {
         <button
           type="button"
           className="nav-control-btn nav-icon-btn top-nav-more-btn"
-          aria-label="More options"
+          aria-label={tr('moreOptions')}
           aria-expanded={showMobileMenu}
           onClick={() => setShowMobileMenu((v) => !v)}
         >
@@ -161,7 +161,7 @@ export default function TopNav() {
         <button
           type="button"
           className="top-nav-mobile-backdrop"
-          aria-label="Close menu"
+          aria-label={tr('closeMenu')}
           onClick={() => { setShowNotifications(false); setShowMobileMenu(false); }}
         />
       )}

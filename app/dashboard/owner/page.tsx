@@ -21,6 +21,7 @@ import UploadsPanel from '@/components/UploadsPanel';
 import FormField from '@/components/FormField';
 import { BADGES } from '@/lib/constants';
 import { formatBirr } from '@/lib/format';
+import { OWNER_SECTION_KEYS, translateVoucherStatus } from '@/lib/i18n/translations';
 import { toast } from '@/components/ToastProvider';
 import { useI18n } from '@/contexts/I18nContext';
 
@@ -157,7 +158,7 @@ export default function OwnerDashboardPage() {
       gameAgentId: agentForm.gameAgentId ? Number(agentForm.gameAgentId) : null,
     };
     if (!payload.name || !payload.username || (!agentForm.id && !payload.password)) {
-      toast.error('Please complete required fields.');
+      toast.error(tr('pleaseCompleteFields'));
       return;
     }
     const url = agentForm.id ? `/api/users/${agentForm.id}` : '/api/users';
@@ -173,7 +174,7 @@ export default function OwnerDashboardPage() {
       toast.error(data.message);
       return;
     }
-    toast.success(agentForm.id ? 'Agent updated.' : 'Agent created.');
+    toast.success(agentForm.id ? tr('agentUpdated') : tr('agentCreated'));
     setAgentForm(defaultAgentForm);
     loadAll();
   };
@@ -203,10 +204,10 @@ export default function OwnerDashboardPage() {
       }),
     });
     if (!ownerRes.ok || !appRes.ok) {
-      toast.error('Unable to save settings.');
+      toast.error(tr('settingsSaveFailed'));
       return;
     }
-    toast.success('Settings saved.');
+    toast.success(tr('settingsSaved'));
     setSettings((s) => ({ ...s, password: '', downloadPassword: '' }));
     loadAll();
   };
@@ -231,8 +232,8 @@ export default function OwnerDashboardPage() {
       section={section}
       onSectionChange={setSection}
       navItems={navItems}
-      sectionTitle={tr(section as 'dashboard')}
-      breadcrumb={`${tr('overview')} / ${tr(section as 'dashboard')}`}
+      sectionTitle={tr(OWNER_SECTION_KEYS[section] ?? 'dashboard')}
+      breadcrumb={`${tr('overview')} / ${tr(OWNER_SECTION_KEYS[section] ?? 'dashboard')}`}
       onLogout={logout}
     >
       {section === 'dashboard' && (
@@ -270,7 +271,7 @@ export default function OwnerDashboardPage() {
                     <tr>
                       <th>{tr('voucherCode')}</th>
                       <th>{tr('amount')}</th>
-                      <th>Agent</th>
+                      <th>{tr('agent')}</th>
                       <th>{tr('date')}</th>
                       <th>{tr('status')}</th>
                     </tr>
@@ -282,7 +283,7 @@ export default function OwnerDashboardPage() {
                         <td>{formatBirr(v.amount)}</td>
                         <td>{v.agentName}</td>
                         <td>{new Date(v.createdAt).toLocaleDateString()}</td>
-                        <td><span className={`status-badge status-${v.status}`}>{v.status}</span></td>
+                        <td><span className={`status-badge status-${v.status}`}>{translateVoucherStatus(v.status, tr)}</span></td>
                       </tr>
                     ))}
                   </tbody>
@@ -315,7 +316,7 @@ export default function OwnerDashboardPage() {
             <div className="table-responsive">
               <table className="table table-hover">
                 <thead>
-                  <tr><th>Agent</th><th>{tr('phone')}</th><th>Badge</th><th>Balance</th><th>Actions</th></tr>
+                  <tr><th>{tr('agent')}</th><th>{tr('phone')}</th><th>{tr('badge')}</th><th>{tr('balance')}</th><th>{tr('actions')}</th></tr>
                 </thead>
                 <tbody>
                   {activeAgents.map((agent) => (
@@ -326,8 +327,8 @@ export default function OwnerDashboardPage() {
                       <td>{formatBirr(agent.balance)}</td>
                       <td>
                         <div className="table-actions agent-row-actions">
-                          <button type="button" className="btn btn-light btn-sm" onClick={() => setAgentForm({ id: agent.id, name: agent.name, username: agent.username, password: '', phone: agent.phone, avatar: agent.avatar, badge: agent.badge, balance: String(agent.balance), gameAgentId: agent.gameAgentId != null ? String(agent.gameAgentId) : '' })}>Edit</button>
-                          <button type="button" className="btn btn-light btn-sm text-danger" onClick={async () => { if (window.confirm('Delete agent?')) { await fetch(`/api/users/${agent.id}`, { method: 'DELETE' }); loadAll(); } }}>Delete</button>
+                          <button type="button" className="btn btn-light btn-sm" onClick={() => setAgentForm({ id: agent.id, name: agent.name, username: agent.username, password: '', phone: agent.phone, avatar: agent.avatar, badge: agent.badge, balance: String(agent.balance), gameAgentId: agent.gameAgentId != null ? String(agent.gameAgentId) : '' })}>{tr('edit')}</button>
+                          <button type="button" className="btn btn-light btn-sm text-danger" onClick={async () => { if (window.confirm(tr('deleteAgentConfirm'))) { await fetch(`/api/users/${agent.id}`, { method: 'DELETE' }); loadAll(); } }}>{tr('deleteClient')}</button>
                         </div>
                       </td>
                     </tr>
@@ -346,21 +347,21 @@ export default function OwnerDashboardPage() {
                 <FormField label={tr('username')}>
                   <input className="form-control" value={agentForm.username} onChange={(e) => setAgentForm({ ...agentForm, username: e.target.value })} />
                 </FormField>
-                <FormField label="Password" hint={agentForm.id ? 'Leave blank to keep current password' : undefined}>
+                <FormField label={tr('password')} hint={agentForm.id ? tr('leavePasswordBlank') : undefined}>
                   <input className="form-control" type="password" value={agentForm.password} onChange={(e) => setAgentForm({ ...agentForm, password: e.target.value })} />
                 </FormField>
                 <FormField label={tr('phone')}>
                   <input className="form-control" value={agentForm.phone} onChange={(e) => setAgentForm({ ...agentForm, phone: e.target.value })} />
                 </FormField>
-                <FormField label="Badge">
+                <FormField label={tr('badge')}>
                   <select className="form-control" value={agentForm.badge} onChange={(e) => setAgentForm({ ...agentForm, badge: e.target.value })}>
                     {BADGES.map((b) => <option key={b.value} value={b.value}>{`${b.value} ${b.label}`}</option>)}
                   </select>
                 </FormField>
-                <FormField label="Desktop Agent ID" hint="Must match Edle Bingo app agentId">
+                <FormField label={tr('desktopAgentId')} hint={tr('desktopAgentIdHint')}>
                   <input className="form-control" type="number" value={agentForm.gameAgentId} onChange={(e) => setAgentForm({ ...agentForm, gameAgentId: e.target.value })} />
                 </FormField>
-                <FormField label="Initial credit (Birr)">
+                <FormField label={tr('initialCredit')}>
                   <input className="form-control" type="number" value={agentForm.balance} onChange={(e) => setAgentForm({ ...agentForm, balance: e.target.value })} />
                 </FormField>
                 <button type="submit" className="btn btn-primary">{tr('save')}</button>
@@ -381,17 +382,17 @@ export default function OwnerDashboardPage() {
       toast.error(data.message);
       return;
     }
-              toast.success('Top-up completed.');
+              toast.success(tr('topUpCompleted'));
               setTopUp({ agentId: '', amount: '' });
               loadAll();
             }} className="form-layout">
-              <FormField label="Agent">
+              <FormField label={tr('agent')}>
                 <select className="form-control" value={topUp.agentId} onChange={(e) => setTopUp({ ...topUp, agentId: e.target.value })}>
-                  <option value="">Select agent</option>
+                  <option value="">{tr('selectAgentOption')}</option>
                   {activeAgents.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
                 </select>
               </FormField>
-              <FormField label="Amount (Birr)">
+              <FormField label={tr('amountBirr')}>
                 <input className="form-control" type="number" step="0.01" value={topUp.amount} onChange={(e) => setTopUp({ ...topUp, amount: e.target.value })} />
               </FormField>
               <button type="submit" className="btn btn-primary">{tr('topUp')}</button>
@@ -405,7 +406,7 @@ export default function OwnerDashboardPage() {
           <div className="table-responsive">
             <table className="table table-hover">
               <thead>
-                <tr><th>{tr('voucherCode')}</th><th>{tr('amount')}</th><th>Agent</th><th>{tr('date')}</th><th>{tr('status')}</th></tr>
+                <tr><th>{tr('voucherCode')}</th><th>{tr('amount')}</th><th>{tr('agent')}</th><th>{tr('date')}</th><th>{tr('status')}</th></tr>
               </thead>
               <tbody>
                 {vouchers.map((v) => (
@@ -414,7 +415,7 @@ export default function OwnerDashboardPage() {
                     <td>{formatBirr(v.amount)}</td>
                     <td>{v.agentName}</td>
                     <td>{new Date(v.createdAt).toLocaleString()}</td>
-                    <td>{v.status}</td>
+                    <td>{translateVoucherStatus(v.status, tr)}</td>
                   </tr>
                 ))}
               </tbody>

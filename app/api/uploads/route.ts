@@ -94,7 +94,7 @@ export async function POST(request: Request) {
   const maxBytes = meta.maxSizeMb * 1024 * 1024;
   if (file.size > maxBytes) {
     return NextResponse.json(
-      { message: `File too large. Maximum size for ${meta.label} is ${meta.maxSizeMb} MB.` },
+      { message: `File too large. Maximum size for this category is ${meta.maxSizeMb} MB.` },
       { status: 400 },
     );
   }
@@ -102,7 +102,7 @@ export async function POST(request: Request) {
   const existingCount = await prisma.downloadAsset.count({ where: { category } });
   if (meta.maxFiles !== null && existingCount >= meta.maxFiles) {
     return NextResponse.json(
-      { message: `${meta.label} allows at most ${meta.maxFiles} file(s). Delete an existing file first.` },
+      { message: `This category allows at most ${meta.maxFiles} file(s). Delete an existing file first.` },
       { status: 400 },
     );
   }

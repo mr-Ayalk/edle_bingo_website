@@ -2,7 +2,6 @@
 
 import { useI18n } from '@/contexts/I18nContext';
 import FormField from '@/components/FormField';
-import { toast } from '@/components/ToastProvider';
 
 type SettingsState = {
   name: string;
@@ -35,17 +34,17 @@ export default function OwnerSettingsPanel({ settings, onChange, onSave }: Owner
             <div className="settings-card-icon">🔐</div>
             <div>
               <h3>{tr('ownerSettings')}</h3>
-              <p>Update your administrator login credentials</p>
+              <p>{tr('ownerSettingsDesc')}</p>
             </div>
           </div>
           <div className="settings-card-body">
-            <FormField label="Display name">
+            <FormField label={tr('displayName')}>
               <input className="form-control" value={settings.name} onChange={(e) => set({ name: e.target.value })} />
             </FormField>
             <FormField label={tr('username')}>
               <input className="form-control" value={settings.username} onChange={(e) => set({ username: e.target.value })} autoComplete="username" />
             </FormField>
-            <FormField label="New password" hint="Leave blank to keep current password">
+            <FormField label={tr('newPassword')} hint={tr('leavePasswordBlank')}>
               <input className="form-control" type="password" value={settings.password} onChange={(e) => set({ password: e.target.value })} autoComplete="new-password" />
             </FormField>
           </div>
@@ -56,15 +55,15 @@ export default function OwnerSettingsPanel({ settings, onChange, onSave }: Owner
             <div className="settings-card-icon">📋</div>
             <div>
               <h3>{tr('aboutSettings')}</h3>
-              <p>Content shown on owner and agent dashboards</p>
+              <p>{tr('aboutSettingsDesc')}</p>
             </div>
           </div>
           <div className="settings-card-body">
-            <FormField label="About title">
+            <FormField label={tr('aboutTitle')}>
               <input className="form-control" value={settings.aboutTitle} onChange={(e) => set({ aboutTitle: e.target.value })} />
             </FormField>
-            <FormField label={tr('description')} hint="Press Enter twice to start a new paragraph">
-              <textarea className="form-control" rows={6} value={settings.aboutDescription} onChange={(e) => set({ aboutDescription: e.target.value })} />
+            <FormField label={tr('description')} hint={tr('paragraphHint')}>
+              <textarea className="form-control" rows={4} value={settings.aboutDescription} onChange={(e) => set({ aboutDescription: e.target.value })} />
             </FormField>
             <FormField label={tr('contact')}>
               <textarea className="form-control" rows={3} value={settings.contactInfo} onChange={(e) => set({ contactInfo: e.target.value })} />
@@ -72,7 +71,7 @@ export default function OwnerSettingsPanel({ settings, onChange, onSave }: Owner
             <FormField label={tr('location')}>
               <input className="form-control" value={settings.location} onChange={(e) => set({ location: e.target.value })} />
             </FormField>
-            <FormField label="Slogan">
+            <FormField label={tr('slogan')}>
               <input className="form-control" value={settings.slogan} onChange={(e) => set({ slogan: e.target.value })} />
             </FormField>
           </div>
@@ -83,14 +82,14 @@ export default function OwnerSettingsPanel({ settings, onChange, onSave }: Owner
             <div className="settings-card-icon">⬇️</div>
             <div>
               <h3>{tr('downloadPortalSettings')}</h3>
-              <p>Credentials for software download access</p>
+              <p>{tr('downloadPortalDesc')}</p>
             </div>
           </div>
           <div className="settings-card-body">
-            <FormField label="Download username">
+            <FormField label={tr('downloadUsername')}>
               <input className="form-control" value={settings.downloadUsername} onChange={(e) => set({ downloadUsername: e.target.value })} />
             </FormField>
-            <FormField label="Download password" hint="Leave blank to keep current password">
+            <FormField label={tr('downloadPassword')} hint={tr('leavePasswordBlank')}>
               <input className="form-control" type="password" value={settings.downloadPassword} onChange={(e) => set({ downloadPassword: e.target.value })} />
             </FormField>
           </div>
@@ -103,5 +102,3 @@ export default function OwnerSettingsPanel({ settings, onChange, onSave }: Owner
     </div>
   );
 }
-
-export { toast };

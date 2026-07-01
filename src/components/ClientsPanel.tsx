@@ -57,7 +57,7 @@ export default function ClientsPanel({ isOwner }: { isOwner: boolean }) {
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isOwner && (!form.fullName || !form.phone)) {
-      toast.error('Full name and phone are required.');
+      toast.error(tr('fullNamePhoneRequired'));
       return;
     }
 
@@ -86,21 +86,21 @@ export default function ClientsPanel({ isOwner }: { isOwner: boolean }) {
     if (res.ok) {
       setForm(emptyForm);
       load();
-      toast.success(form.id ? 'Client updated.' : 'Client added.');
+      toast.success(form.id ? tr('clientUpdated') : tr('clientAdded'));
     } else {
       const data = await res.json();
-      toast.error(data.message || 'Failed to save.');
+      toast.error(data.message || tr('saveFailed'));
     }
   };
 
   const remove = async (id: number) => {
-    if (!window.confirm('Delete this client?')) return;
+    if (!window.confirm(tr('deleteClientConfirm'))) return;
     const res = await fetch(`/api/clients/${id}`, { method: 'DELETE' });
     if (res.ok) {
       load();
-      toast.success('Client deleted.');
+      toast.success(tr('clientDeleted'));
     } else {
-      toast.error('Could not delete client.');
+      toast.error(tr('couldNotDeleteClient'));
     }
   };
 
@@ -186,14 +186,14 @@ export default function ClientsPanel({ isOwner }: { isOwner: boolean }) {
 
       <div className="card fill-card clients-table">
         <div className="card-header"><h4 className="card-title">{tr('clients')}</h4></div>
-        <p className="table-scroll-hint">Swipe horizontally to see all columns</p>
+        <p className="table-scroll-hint">{tr('swipeTableHint')}</p>
         <div className="table-responsive">
           <table className="table table-hover">
             <thead>
               <tr>
                 <th>{tr('fullName')}</th>
                 <th>{tr('phone')}</th>
-                {isOwner && <th>Agent</th>}
+                {isOwner && <th>{tr('agent')}</th>}
                 <th>{tr('country')}</th>
                 <th>{tr('region')}</th>
                 <th>{tr('zone')}</th>
@@ -203,7 +203,7 @@ export default function ClientsPanel({ isOwner }: { isOwner: boolean }) {
                 <th>{tr('kebele')}</th>
                 <th>{tr('addressDetail')}</th>
                 <th>{tr('packageAmount')}</th>
-                {!isOwner && <th>Actions</th>}
+                {!isOwner && <th>{tr('actions')}</th>}
               </tr>
             </thead>
             <tbody>
@@ -223,7 +223,7 @@ export default function ClientsPanel({ isOwner }: { isOwner: boolean }) {
                   <td>{formatBirr(c.packageAmount)}</td>
                   {!isOwner && (
                     <td className="table-actions">
-                      <button type="button" className="btn btn-light btn-sm" onClick={() => edit(c)}>Edit</button>
+                      <button type="button" className="btn btn-light btn-sm" onClick={() => edit(c)}>{tr('edit')}</button>
                       <button type="button" className="btn btn-danger btn-sm" onClick={() => remove(c.id)}>{tr('deleteClient')}</button>
                     </td>
                   )}

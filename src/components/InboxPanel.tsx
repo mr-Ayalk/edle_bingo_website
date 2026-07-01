@@ -96,20 +96,20 @@ export default function InboxPanel({ currentUserId }: { currentUserId: number })
       setSticker('');
       setImageFile(null);
       loadMessages(selectedId);
-      toast.success('Message sent');
+      toast.success(tr('messageSent'));
     } else {
-      toast.error('Failed to send message');
+      toast.error(tr('messageFailed'));
     }
   };
 
   const deleteMessage = async (id: number) => {
-    if (!window.confirm('Delete this message?')) return;
+    if (!window.confirm(tr('deleteMessageConfirm'))) return;
     const res = await fetch(`/api/messages/${id}`, { method: 'DELETE' });
     if (res.ok) {
-      toast.success('Message deleted');
+      toast.success(tr('messageDeleted'));
       if (selectedId) loadMessages(selectedId);
     } else {
-      toast.error('Could not delete message');
+      toast.error(tr('couldNotDeleteMessage'));
     }
   };
 
@@ -120,11 +120,11 @@ export default function InboxPanel({ currentUserId }: { currentUserId: number })
       body: JSON.stringify({ content: editContent, fontFamily }),
     });
     if (res.ok) {
-      toast.success('Message updated');
+      toast.success(tr('messageUpdated'));
       setEditingId(null);
       if (selectedId) loadMessages(selectedId);
     } else {
-      toast.error('Could not update message');
+      toast.error(tr('couldNotUpdateMessage'));
     }
   };
 
@@ -154,7 +154,7 @@ export default function InboxPanel({ currentUserId }: { currentUserId: number })
               <button
                 type="button"
                 className="inbox-back-btn"
-                aria-label="Back to contacts"
+                aria-label={tr('backToContacts')}
                 onClick={() => setMobileShowChat(false)}
               >
                 ←
@@ -198,7 +198,7 @@ export default function InboxPanel({ currentUserId }: { currentUserId: number })
                             className="btn btn-light btn-sm"
                             onClick={() => { setEditingId(m.id); setEditContent(m.content); }}
                           >
-                            Edit
+                            {tr('edit')}
                           </button>
                           <button type="button" className="btn btn-danger btn-sm" onClick={() => deleteMessage(m.id)}>
                             {tr('deleteClient')}

@@ -737,6 +737,16 @@ button { cursor: pointer; }
   object-fit: contain;
 }
 
+.split-login-lang {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.split-login-lang .nav-lang-select {
+  min-width: 140px;
+}
+
 .split-login-title {
   font-size: 1.85rem;
   font-weight: 800;

@@ -14,9 +14,6 @@ export async function GET() {
 
   const grouped = DOWNLOAD_CATEGORIES.map((cat) => ({
     category: cat.id,
-    label: cat.label,
-    description: cat.description,
-    icon: cat.icon,
     files: assets
       .filter((a) => a.category === cat.id)
       .map((a) => ({
