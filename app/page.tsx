@@ -7,7 +7,7 @@ import { toast } from '@/components/ToastProvider';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { tr, locale, setLocale } = useI18n();
+  const { tr } = useI18n();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -61,17 +61,6 @@ export default function LoginPage() {
             height={48}
             className="split-login-icon"
           />
-          <div className="split-login-lang">
-            <select
-              className="nav-lang-select"
-              value={locale}
-              onChange={(e) => setLocale(e.target.value as 'en' | 'am')}
-              aria-label={tr('language')}
-            >
-              <option value="en">{tr('english')}</option>
-              <option value="am">{tr('amharic')}</option>
-            </select>
-          </div>
           <h1 className="split-login-title">{tr('signInPortal')}</h1>
           <div className="split-login-card">
             <form onSubmit={handleLogin} className="split-login-form">
