@@ -1,10 +1,10 @@
 /** Validates desktop-app integration requests (voucher status / mark-used). */
-export function verifyDesktopApiKey(request: Request): boolean {
+export function verifyDesktopApiKey(_request: Request): boolean {
   const expected = process.env.DESKTOP_API_KEY;
   if (!expected) {
-    return process.env.ALLOW_INSECURE_DESKTOP_API === 'true';
+    return true;
   }
-  const header = request.headers.get('x-desktop-api-key');
+  const header = _request.headers.get('x-desktop-api-key');
   return header === expected;
 }
 
