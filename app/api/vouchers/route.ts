@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/db';
 import { requireOwnerOrAgent, requireAgent } from '@/lib/api-auth';
 import { generateVoucherCode, isValidVoucherCode } from '@/lib/constants';
-import { parseMoney, subtractMoney, moneyToNumber } from '@/lib/money';
+import { parseMoney, moneyToNumber } from '@/lib/money';
 import { serializeUser } from '@/lib/auth';
 
 export async function GET() {
@@ -90,12 +91,20 @@ export async function POST(request: Request) {
         });
         if (!agent) throw new Error('Agent not found.');
 
-        const newBalance = subtractMoney(agent.balance, voucherAmount);
-
-        const updatedAgent = await tx.user.update({
-          where: { id: agent.id },
-          data: { balance: newBalance },
+        const debited = await tx.user.updateMany({
+          where: {
+            id: userId,
+            role: 'AGENT',
+            balance: { gte: voucherAmount },
+          },
+          data: { balance: { decrement: voucherAmount } },
         });
+
+        if (debited.count === 0) {
+          throw new Error('Insufficient balance.');
+        }
+
+        const updatedAgent = await tx.user.findUniqueOrThrow({ where: { id: userId } });
 
         const voucher = await tx.voucher.create({
           data: {
@@ -126,6 +135,9 @@ export async function POST(request: Request) {
       { status: 201 },
     );
   } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      return NextResponse.json({ message: 'A voucher with this code already exists.' }, { status: 409 });
+    }
     const message = error instanceof Error ? error.message : 'Unable to create voucher.';
     const status = message.includes('Insufficient') ? 400 : 500;
     return NextResponse.json({ message }, { status });

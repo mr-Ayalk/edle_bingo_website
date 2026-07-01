@@ -4,6 +4,7 @@ import { requireOwner, requireSession } from '@/lib/api-auth';
 import { hashPassword } from '@/lib/password';
 import { parseMoney } from '@/lib/money';
 import { serializeUser } from '@/lib/auth';
+import { parseRouteId } from '@/lib/route-params';
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -12,12 +13,16 @@ export async function PATCH(request: Request, context: RouteContext) {
   if (session instanceof NextResponse) return session;
 
   const { id } = await context.params;
-  const userId = Number(id);
+  const userId = parseRouteId(id);
+  if (userId == null) {
+    return NextResponse.json({ message: 'Invalid user ID.' }, { status: 400 });
+  }
 
   const isSelf = Number(session.sub) === userId;
   if (!isSelf && session.role !== 'OWNER') {
     return NextResponse.json({ message: 'Forbidden' }, { status: 403 });
   }
+
   const body = await request.json();
 
   const user = await prisma.user.findUnique({ where: { id: userId } });
@@ -25,6 +30,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     return NextResponse.json({ message: 'User not found.' }, { status: 404 });
   }
 
+  const isOwner = session.role === 'OWNER';
   const data: Record<string, unknown> = {};
 
   if (body.username) {
@@ -40,10 +46,23 @@ export async function PATCH(request: Request, context: RouteContext) {
   if (body.password) data.passwordHash = await hashPassword(String(body.password));
   if (body.phone !== undefined) data.phone = String(body.phone);
   if (body.avatar) data.avatar = String(body.avatar);
-  if (body.badge) data.badge = String(body.badge);
-  if (body.balance !== undefined) data.balance = parseMoney(body.balance);
-  if (body.gameAgentId !== undefined) {
-    data.gameAgentId = body.gameAgentId === null ? null : Number(body.gameAgentId);
+
+  if (isOwner) {
+    if (body.badge) data.badge = String(body.badge);
+    if (body.balance !== undefined) {
+      try {
+        const balance = parseMoney(body.balance);
+        if (balance.lessThan(0)) {
+          return NextResponse.json({ message: 'Balance cannot be negative.' }, { status: 400 });
+        }
+        data.balance = balance;
+      } catch {
+        return NextResponse.json({ message: 'Invalid balance amount.' }, { status: 400 });
+      }
+    }
+    if (body.gameAgentId !== undefined) {
+      data.gameAgentId = body.gameAgentId === null ? null : Number(body.gameAgentId);
+    }
   }
 
   const updated = await prisma.user.update({ where: { id: userId }, data });
@@ -55,7 +74,10 @@ export async function DELETE(_request: Request, context: RouteContext) {
   if (session instanceof NextResponse) return session;
 
   const { id } = await context.params;
-  const userId = Number(id);
+  const userId = parseRouteId(id);
+  if (userId == null) {
+    return NextResponse.json({ message: 'Invalid user ID.' }, { status: 400 });
+  }
 
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) {

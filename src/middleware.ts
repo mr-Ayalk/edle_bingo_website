@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
 import { AUTH_COOKIE, roleDashboardPath, type SessionPayload } from '@/lib/auth';
+import { getJwtSecretBytes, isJwtConfigured } from '@/lib/jwt-secret';
 
 const PUBLIC_PATHS = [
   '/',
@@ -12,17 +13,11 @@ const PUBLIC_PATHS = [
   '/api/vouchers/mark-used',
 ];
 
-function getSecret(): Uint8Array {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) return new TextEncoder().encode('development-fallback-secret-min-32-chars!!');
-  return new TextEncoder().encode(secret);
-}
-
 async function readSession(request: NextRequest): Promise<SessionPayload | null> {
   const token = request.cookies.get(AUTH_COOKIE)?.value;
   if (!token) return null;
   try {
-    const { payload } = await jwtVerify(token, getSecret());
+    const { payload } = await jwtVerify(token, getJwtSecretBytes());
     return payload as unknown as SessionPayload;
   } catch {
     return null;
@@ -36,10 +31,16 @@ export async function middleware(request: NextRequest) {
     PUBLIC_PATHS.some((p) => pathname === p) ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/images') ||
-    pathname.startsWith('/downloads') ||
     pathname.match(/\.(png|jpg|jpeg|gif|svg|ico|webp)$/)
   ) {
     return NextResponse.next();
+  }
+
+  if (process.env.NODE_ENV === 'production' && !isJwtConfigured()) {
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json({ message: 'Server misconfigured.' }, { status: 503 });
+    }
+    return new NextResponse('Server misconfigured.', { status: 503 });
   }
 
   const session = await readSession(request);

@@ -1,6 +1,8 @@
+import { randomInt } from 'crypto';
+
 export function generateVoucherCode(): string {
-  const part = () => String(Math.floor(Math.random() * 1000)).padStart(3, '0');
-  const part4 = () => String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+  const part = () => String(randomInt(0, 1000)).padStart(3, '0');
+  const part4 = () => String(randomInt(0, 10000)).padStart(4, '0');
   return `${part()}-${part()}-${part4()}`;
 }
 

@@ -21,7 +21,7 @@ export async function GET() {
         name: a.name,
         description: a.description,
         fileName: a.fileName,
-        file: a.filePath,
+        file: `/api/downloads/file/${a.id}`,
         fileSize: a.fileSize,
       })),
   })).filter((g) => g.files.length > 0);

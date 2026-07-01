@@ -40,6 +40,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: 'Username already exists.' }, { status: 409 });
   }
 
+  let balance;
+  try {
+    balance = parseMoney(body.balance ?? 0);
+    if (balance.lessThan(0)) {
+      return NextResponse.json({ message: 'Balance cannot be negative.' }, { status: 400 });
+    }
+  } catch {
+    return NextResponse.json({ message: 'Invalid balance amount.' }, { status: 400 });
+  }
+
   const user = await prisma.user.create({
     data: {
       username,
@@ -49,7 +59,7 @@ export async function POST(request: Request) {
       phone: String(body.phone || ''),
       avatar: String(body.avatar || '🎲'),
       badge: String(body.badge || '🚩'),
-      balance: parseMoney(body.balance ?? 0),
+      balance,
       gameAgentId: body.gameAgentId ? Number(body.gameAgentId) : null,
     },
   });

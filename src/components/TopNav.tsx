@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Bell, Moon, MoreVertical, Sun } from 'lucide-react';
+import ClientDate from '@/components/ClientDate';
 import { useI18n } from '@/contexts/I18nContext';
 import { useTheme } from '@/contexts/ThemeContext';
 
@@ -89,7 +90,7 @@ export default function TopNav() {
         <div key={n.id} className="notification-item unread">
           <strong>{n.title}</strong>
           <p>{n.body}</p>
-          <small>{new Date(n.createdAt).toLocaleString()}</small>
+          <small><ClientDate iso={n.createdAt} mode="datetime" /></small>
         </div>
       )) : <p className="notification-empty">{tr('noData')}</p>}
     </>

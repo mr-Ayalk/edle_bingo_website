@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireOwnerOrAgent } from '@/lib/api-auth';
 import { parseMoney, moneyToNumber } from '@/lib/money';
+import { parseRouteId } from '@/lib/route-params';
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -13,7 +14,10 @@ export async function PATCH(request: Request, context: RouteContext) {
   }
 
   const { id } = await context.params;
-  const clientId = Number(id);
+  const clientId = parseRouteId(id);
+  if (clientId == null) {
+    return NextResponse.json({ message: 'Invalid client ID.' }, { status: 400 });
+  }
 
   const existing = await prisma.client.findFirst({
     where: { id: clientId, agentUserId: Number(session.sub) },
@@ -35,7 +39,13 @@ export async function PATCH(request: Request, context: RouteContext) {
   if (body.wereda !== undefined) data.wereda = String(body.wereda);
   if (body.kebele !== undefined) data.kebele = String(body.kebele);
   if (body.addressDetail !== undefined) data.addressDetail = String(body.addressDetail);
-  if (body.packageAmount !== undefined) data.packageAmount = parseMoney(body.packageAmount);
+  if (body.packageAmount !== undefined) {
+    try {
+      data.packageAmount = parseMoney(body.packageAmount);
+    } catch {
+      return NextResponse.json({ message: 'Invalid package amount.' }, { status: 400 });
+    }
+  }
 
   const client = await prisma.client.update({ where: { id: clientId }, data });
 
@@ -57,7 +67,10 @@ export async function DELETE(_request: Request, context: RouteContext) {
   }
 
   const { id } = await context.params;
-  const clientId = Number(id);
+  const clientId = parseRouteId(id);
+  if (clientId == null) {
+    return NextResponse.json({ message: 'Invalid client ID.' }, { status: 400 });
+  }
 
   const existing = await prisma.client.findFirst({
     where: { id: clientId, agentUserId: Number(session.sub) },

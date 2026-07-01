@@ -31,9 +31,9 @@ export function parseOptionalAgentId(
 }
 
 export function voucherBelongsToAgent(voucher: Voucher, agentId: number | null): boolean {
-  if (agentId == null) return true;
-  if (voucher.gameAgentId == null) return true;
-  return voucher.gameAgentId === agentId;
+  if (agentId == null) return false;
+  if (voucher.gameAgentId != null) return voucher.gameAgentId === agentId;
+  return voucher.agentUserId === agentId;
 }
 
 export function serializeVoucherForDesktop(voucher: Voucher) {

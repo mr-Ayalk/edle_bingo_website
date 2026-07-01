@@ -1,6 +1,7 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 import type { Role } from '@prisma/client';
+import { getJwtSecretBytes } from './jwt-secret';
 
 export const AUTH_COOKIE = 'edle_auth_token';
 
@@ -12,14 +13,7 @@ export type SessionPayload = {
 };
 
 function getSecret(): Uint8Array {
-  const secret = process.env.JWT_SECRET;
-  if (!secret || secret.length < 32) {
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error('JWT_SECRET must be set and at least 32 characters.');
-    }
-    return new TextEncoder().encode('development-fallback-secret-min-32-chars!!');
-  }
-  return new TextEncoder().encode(secret);
+  return getJwtSecretBytes();
 }
 
 export async function createToken(payload: SessionPayload): Promise<string> {

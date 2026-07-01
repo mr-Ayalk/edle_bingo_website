@@ -5,6 +5,7 @@ import type { DownloadCategory } from '@prisma/client';
 import { Eye, EyeOff, Pencil, Trash2, Upload } from 'lucide-react';
 import FormField from '@/components/FormField';
 import { toast } from '@/components/ToastProvider';
+import ClientDate from '@/components/ClientDate';
 import { useI18n } from '@/contexts/I18nContext';
 import {
   DOWNLOAD_CATEGORIES,
@@ -268,7 +269,7 @@ export default function UploadsPanel() {
                         <strong>{asset.name}</strong>
                         {asset.description && <p className="text-muted">{asset.description}</p>}
                         <small className="text-muted">
-                          {asset.fileName} · {formatFileSize(asset.fileSize)} · {new Date(asset.createdAt).toLocaleDateString()}
+                          {asset.fileName} · {formatFileSize(asset.fileSize)} · <ClientDate iso={asset.createdAt} />
                         </small>
                       </div>
                       <div className="uploads-file-actions">

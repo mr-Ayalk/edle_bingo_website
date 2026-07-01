@@ -16,6 +16,7 @@ import ClientsPanel from '@/components/ClientsPanel';
 import FormField from '@/components/FormField';
 import { generateVoucherCode } from '@/lib/constants';
 import { formatBirr } from '@/lib/format';
+import ClientDate from '@/components/ClientDate';
 import { toast } from '@/components/ToastProvider';
 import { useI18n } from '@/contexts/I18nContext';
 import { AGENT_SECTION_KEYS, translateVoucherStatus } from '@/lib/i18n/translations';
@@ -172,7 +173,7 @@ export default function AgentDashboardPage() {
                     <tr key={v.id}>
                       <td className="copy-cell"><CopyButton text={v.code} /><strong>{v.code}</strong></td>
                       <td>{formatBirr(v.amount)}</td>
-                      <td>{new Date(v.createdAt).toLocaleDateString()}</td>
+                      <td><ClientDate iso={v.createdAt} /></td>
                       <td><span className={`status-badge status-${v.status}`}>{translateVoucherStatus(v.status, tr)}</span></td>
                     </tr>
                   )) : (

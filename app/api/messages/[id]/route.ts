@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { requireOwnerOrAgent } from '@/lib/api-auth';
+import { parseRouteId } from '@/lib/route-params';
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -9,7 +10,11 @@ export async function PATCH(request: Request, context: RouteContext) {
   if (session instanceof NextResponse) return session;
 
   const { id } = await context.params;
-  const messageId = Number(id);
+  const messageId = parseRouteId(id);
+  if (messageId == null) {
+    return NextResponse.json({ message: 'Invalid message ID.' }, { status: 400 });
+  }
+
   const userId = Number(session.sub);
   const body = await request.json();
 
@@ -44,7 +49,11 @@ export async function DELETE(_request: Request, context: RouteContext) {
   if (session instanceof NextResponse) return session;
 
   const { id } = await context.params;
-  const messageId = Number(id);
+  const messageId = parseRouteId(id);
+  if (messageId == null) {
+    return NextResponse.json({ message: 'Invalid message ID.' }, { status: 400 });
+  }
+
   const userId = Number(session.sub);
 
   const existing = await prisma.message.findUnique({ where: { id: messageId } });

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { FONT_OPTIONS, STICKERS } from '@/lib/constants';
+import ClientDate from '@/components/ClientDate';
 import { useI18n } from '@/contexts/I18nContext';
 import { toast } from '@/components/ToastProvider';
 
@@ -190,7 +191,7 @@ export default function InboxPanel({ currentUserId }: { currentUserId: number })
                         <img src={m.imageUrl} alt="attachment" className="inbox-image" />
                       )}
                       {m.content && <p>{m.content}</p>}
-                      <small>{new Date(m.createdAt).toLocaleString()}</small>
+                      <small><ClientDate iso={m.createdAt} mode="datetime" /></small>
                       {m.senderId === currentUserId && (
                         <div className="inbox-message-actions">
                           <button

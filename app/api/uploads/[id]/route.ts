@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
-import { unlink } from 'fs/promises';
-import path from 'path';
 import { prisma } from '@/lib/db';
 import { requireOwner } from '@/lib/api-auth';
+import { removeAssetFile } from '@/lib/download-storage';
+import { parseBoolean } from '@/lib/parse-boolean';
+import { parseRouteId } from '@/lib/route-params';
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -36,21 +37,16 @@ function serializeAsset(asset: {
   };
 }
 
-async function removeFileFromDisk(filePath: string) {
-  try {
-    const abs = path.join(process.cwd(), 'public', filePath.replace(/^\//, ''));
-    await unlink(abs);
-  } catch {
-    // ignore
-  }
-}
-
 export async function PATCH(request: Request, context: RouteContext) {
   const session = await requireOwner();
   if (session instanceof NextResponse) return session;
 
   const { id } = await context.params;
-  const assetId = Number(id);
+  const assetId = parseRouteId(id);
+  if (assetId == null) {
+    return NextResponse.json({ message: 'Invalid file ID.' }, { status: 400 });
+  }
+
   const body = await request.json();
 
   const existing = await prisma.downloadAsset.findUnique({ where: { id: assetId } });
@@ -63,7 +59,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     data: {
       ...(body.name !== undefined ? { name: String(body.name).trim() } : {}),
       ...(body.description !== undefined ? { description: String(body.description) } : {}),
-      ...(body.visible !== undefined ? { visible: Boolean(body.visible) } : {}),
+      ...(body.visible !== undefined ? { visible: parseBoolean(body.visible) } : {}),
     },
   });
 
@@ -75,14 +71,17 @@ export async function DELETE(_request: Request, context: RouteContext) {
   if (session instanceof NextResponse) return session;
 
   const { id } = await context.params;
-  const assetId = Number(id);
+  const assetId = parseRouteId(id);
+  if (assetId == null) {
+    return NextResponse.json({ message: 'Invalid file ID.' }, { status: 400 });
+  }
 
   const existing = await prisma.downloadAsset.findUnique({ where: { id: assetId } });
   if (!existing) {
     return NextResponse.json({ message: 'File not found.' }, { status: 404 });
   }
 
-  await removeFileFromDisk(existing.filePath);
+  await removeAssetFile(existing.filePath);
   await prisma.downloadAsset.delete({ where: { id: assetId } });
 
   return NextResponse.json({ message: 'File deleted.' });

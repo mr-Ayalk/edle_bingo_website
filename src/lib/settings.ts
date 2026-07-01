@@ -6,10 +6,15 @@ export async function ensureAppSettings() {
   const existing = await prisma.appSettings.findUnique({ where: { id: 1 } });
   if (existing) return existing;
 
+  const defaultDownloadPassword = process.env.DEFAULT_DOWNLOAD_PASSWORD;
+  if (process.env.NODE_ENV === 'production' && !defaultDownloadPassword) {
+    throw new Error('DEFAULT_DOWNLOAD_PASSWORD must be set before first run in production.');
+  }
+
   return prisma.appSettings.create({
     data: {
       id: 1,
-      downloadPasswordHash: await hashPassword('downloads123'),
+      downloadPasswordHash: await hashPassword(defaultDownloadPassword || 'downloads123'),
     },
   });
 }
@@ -54,8 +59,12 @@ const DEFAULT_SEED_USERS = [
   },
 ];
 
-/** Creates default users only when their username is not already in the database. */
+/** Creates default users only when their username is not already in the database. Dev/seed only. */
 export async function seedDefaultUsers() {
+  if (process.env.NODE_ENV === 'production' && process.env.ENABLE_DEFAULT_SEED !== 'true') {
+    return;
+  }
+
   for (const user of DEFAULT_SEED_USERS) {
     const existing = await prisma.user.findUnique({ where: { username: user.username } });
     if (existing) continue;
